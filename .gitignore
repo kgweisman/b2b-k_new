@@ -6,4 +6,4 @@ turk/*/production-results/
 turk/*/sandbox-results/
 .RData
 .Rhistory
-raw data/
+*raw*
