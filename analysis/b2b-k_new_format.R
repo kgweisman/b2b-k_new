@@ -208,3 +208,10 @@ d4b = tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv",
                  country = "india", 
                  ageGroup = "adults",
                  framing = "do you think...?")
+
+# join all together!
+d = full_join(d1, d1p) %>% full_join(d3) %>% full_join(d4a) %>% full_join(d4b) %>%
+  mutate(study = factor(study),
+         country = factor(country),
+         framing = factor(framing),
+         subid = factor(subid))
