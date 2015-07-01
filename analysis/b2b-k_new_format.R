@@ -61,103 +61,150 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 
 # --- READING IN RAW DATA -----------------------------------------------------
 
-# ------ study 1 --------------------------------------------------------------
+# make function for formatting qualtrics data
+tidyFormat <- function(rawDataFilename, psPerSequence,
+                       study, country, ageGroup, framing) {
 
-# set study specifications
-study = "1"
-country = "us"
-ageGroup = "adults"
-framing = "does that mean...?"
-
-# read in raw data from qualtrics
-d1.raw <- read.csv("./data/raw/b2b-k_study1_us-adults_mean.csv", 
-                   header = FALSE,
-                   colClasses = "character")
-
-# use column names provided by qualtrics
-d1.0 <- d1.raw
-names(d1.0)[1:12] <- d1.raw[2,1:12]
-names(d1.0)[13:155] <- d1.raw[1,13:155]
-d1.1 <- d1.0[-c(1,2),] # remove rows containing column names
-row.names(d1.1) = NULL
-
-# rename columns with more informative labels
-d1.2 <- d1.1
-names(d1.2) <- ifelse(grepl("Q1.", names(d1.2), fixed = T) == T |
-                        grepl("Q2.", names(d1.2), fixed = T) == T, 
-                      "intro",
-                      gsub("Q3.", "practice.", names(d1.2), fixed = T))
-names(d1.2) <- gsub("_1", "_response", names(d1.2))
-names(d1.2) <- gsub("Q20.2", "comments", names(d1.2))
-names(d1.2)[13:152] <- ifelse(
-  grepl("_response", names(d1.2[13:152]), fixed = T) == F & 
-    grepl("comments", names(d1.2[13:152]), fixed = T) == F,
-  paste0(names(d1.2[13:152]), "_text"), 
-  names(d1.2[13:152]))
-
-# eliminate superfluous columns (no data)
-d1.3 <- d1.2 %>% 
-  select(-ResponseSet, -Name, -ExternalDataReference, -EmailAddress,
-         -IPAddress, -Status, -mTurkCODE, -LocationLatitude, 
-         -LocationLongitude, -LocationAccuracy, -ends_with("text"))
-
-# separate by sequence
-d1.4 <- data.frame()
-for (i in 1:8) {
-  temp = subset(d1.3, Sequence == i)
-  temp[temp == ""] <- NA
-  temp <- Filter(function(x)!all(is.na(x)), temp)
-  names(temp) = c(names(d1.3[1:5]),
-                  "p1", "p2", "p3", # practice trials
-                  "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", # test trials
-                  "comments")
-  d1.4 <- bind_rows(d1.4, temp)
-  rm(temp, i)
+  # set study specifications
+  study <- study
+  country <- country
+  ageGroup <- ageGroup
+  framing <- framing
+  
+  # read in raw data from qualtrics
+  d.raw <- read.csv(paste0("./data/raw/", rawDataFilename), 
+                     header = FALSE,
+                     colClasses = "character")
+  
+  # use column names provided by qualtrics
+  d.0 <- d.raw
+  names(d.0)[1:12] <- d.raw[2,1:12]
+  names(d.0)[13:length(d.0)] <- d.raw[1,13:length(d.raw)]
+  d.1 <- d.0[-c(1,2),] # remove rows containing column names
+  row.names(d.1) = NULL
+  
+  # rename columns with more informative labels
+  d.2 <- d.1
+  names(d.2) <- ifelse(grepl("Q1.", names(d.2), fixed = T) == T |
+                          grepl("Q2.", names(d.2), fixed = T) == T, 
+                        "intro",
+                        gsub("Q3.", "practice.", names(d.2), fixed = T))
+  names(d.2) <- gsub("_1", "_response", names(d.2))
+  names(d.2) <- gsub("Q20.2", "comments", names(d.2))
+  names(d.2) <- gsub("Q144", "demographics", names(d.2))
+  names(d.2) <- gsub("Q142", "gender_response", names(d.2))
+  names(d.2) <- gsub("Q143", "religion_response", names(d.2))
+  names(d.2) <- gsub("Q141", "repeat_response", names(d.2))
+  names(d.2)[13:length(names(d.2))] <- ifelse(
+    grepl("_response", names(d.2[13:length(names(d.2))]), fixed = T) == F & 
+      grepl("comments", names(d.2[13:length(names(d.2))]), fixed = T) == F,
+    paste0(names(d.2[13:length(names(d.2))]), "_text"), 
+    names(d.2[13:length(names(d.2))]))
+  
+  # eliminate superfluous columns (no data)
+  d.3 <- d.2 %>% 
+    select(ResponseID, StartDate, EndDate, Finished, Sequence, intro_text:comments) %>%
+    select(-ends_with("text"))
+  
+  # separate by sequence
+  d.4 <- data.frame()
+  for (i in 1:8) {
+    temp = subset(d.3, Sequence == i)
+    temp[temp == ""] <- NA
+    temp <- Filter(function(x)!all(is.na(x)), temp)
+    names(temp) = c(names(d.3[1:5]),
+                    "p1", "p2", "p3", # practice trials
+                    "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", # test trials
+                    "comments")
+    d.4 <- bind_rows(d.4, temp)
+    rm(temp, i)
+  }
+  
+  # recode variables
+  d.5 <- d.4 %>%
+    mutate(study = factor(study),
+           country = factor(country),
+           ageGroup = factor(ageGroup),
+           framing = factor(framing),
+           subid = factor(ResponseID), 
+           dateOfTest = parse_date_time(StartDate, orders = "mdyHM"),
+           durationOfTest = as.numeric(
+             parse_date_time(EndDate, orders = "mdyHM") - 
+               parse_date_time(StartDate, orders = "mdyHM"))/60,
+           status = factor(ifelse(is.na(t8) == T, "partial", "complete")),
+           sequence = factor(Sequence),
+           # center 4-point response scale around 0
+           p1 = as.numeric(p1) - 2.5, 
+           p2 = as.numeric(p2) - 2.5,
+           p3 = as.numeric(p3) - 2.5,
+           t1 = as.numeric(t1) - 2.5,
+           t2 = as.numeric(t2) - 2.5,
+           t3 = as.numeric(t3) - 2.5,
+           t4 = as.numeric(t4) - 2.5,
+           t5 = as.numeric(t5) - 2.5,
+           t6 = as.numeric(t6) - 2.5,
+           t7 = as.numeric(t7) - 2.5,
+           t8 = as.numeric(t8) - 2.5) %>%
+    select(study, country, ageGroup, framing, 
+           subid, dateOfTest, durationOfTest, status, sequence, p1:t8)
+  
+  # remove participants who did not complete session
+  d.6 <- subset(d.5, status == "complete") %>% select(-status)
+  
+  # randomly select n participants per sequence
+  d.7 <- d.6 %>%
+    group_by(sequence) %>%
+    sample_n(psPerSequence, replace = F)
+  
+  # make into tidy data
+  d.8 <- d.7 %>%
+    gather(trialNum, response, p1:t8) %>%
+    arrange(study, sequence, subid, trialNum)
+  
+  # return final dataframe
+  return(d.8)
+  
+  # remove superfluous objects
+  rm(d.4, i)
 }
 
-# recode variables
-d1.5 <- d1.4 %>%
-  mutate(study = factor(study),
-         country = factor(country),
-         ageGroup = factor(ageGroup),
-         framing = factor(framing),
-         subid = factor(ResponseID), 
-         dateOfTest = parse_date_time(StartDate, orders = "mdyHM"),
-         durationOfTest = as.numeric(
-           parse_date_time(EndDate, orders = "mdyHM") - 
-             parse_date_time(StartDate, orders = "mdyHM"))/60,
-         status = factor(ifelse(is.na(t8) == T, "partial", "complete")),
-         sequence = factor(Sequence),
-         # center 4-point response scale around 0
-         p1 = as.numeric(p1) - 2.5, 
-         p2 = as.numeric(p2) - 2.5,
-         p3 = as.numeric(p3) - 2.5,
-         t1 = as.numeric(t1) - 2.5,
-         t2 = as.numeric(t2) - 2.5,
-         t3 = as.numeric(t3) - 2.5,
-         t4 = as.numeric(t4) - 2.5,
-         t5 = as.numeric(t5) - 2.5,
-         t6 = as.numeric(t6) - 2.5,
-         t7 = as.numeric(t7) - 2.5,
-         t8 = as.numeric(t8) - 2.5) %>%
-  select(study, country, ageGroup, framing, 
-         subid, dateOfTest, durationOfTest, status, sequence, p1:t8)
+# ready in data for qualtrics studies
+# ... study 1
+d1 = tidyFormat(rawDataFilename = "b2b-k_study1_us-adults_mean.csv", 
+                psPerSequence = 10, 
+                study = "1", 
+                country = "us", 
+                ageGroup = "adults",
+                framing = "does that mean...?")
 
-# remove participants who did not complete session
-d1.6 <- subset(d1.5, status == "complete") %>% select(-status)
+# ... study 1'
+d1p = tidyFormat(rawDataFilename = "b2b-k_study1'_us-adults_mean_arousal.csv", 
+                psPerSequence = 9, 
+                study = "1prime", 
+                country = "us", 
+                ageGroup = "adults",
+                framing = "does that mean...?")
 
-# randomly select 10 participants per sequence
-d1.7 <- d1.6 %>%
-  group_by(sequence) %>%
-  sample_n(10, replace = F)
+# ... study 3
+d3 = tidyFormat(rawDataFilename = "b2b-k_study3_indian-adults_mean.csv", 
+                psPerSequence = 10, 
+                study = "1", 
+                country = "india", 
+                ageGroup = "adults",
+                framing = "does that mean...?")
 
-# make into tidy data
-d1.8 <- d1.7 %>%
-  gather(trialNum, response, p1:t8) %>%
-  arrange(study, sequence, subid, trialNum)
+# ... study 4a
+d4a = tidyFormat(rawDataFilename = "b2b-k_study4a_us-adults_think.csv", 
+                psPerSequence = 10, 
+                study = "4", 
+                country = "us", 
+                ageGroup = "adults",
+                framing = "do you think...?")
 
-# finalize data and remove superfluous data objects
-d1 <- d1.8
-rm(d1.raw, d1.0, d1.1, d1.2, d1.3, d1.4, d1.5, d1.6, d1.7, d1.8,
-   study, country, ageGroup, framing)
-
+# ... study 4b
+d4b = tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv", 
+                 psPerSequence = 10, 
+                 study = "4", 
+                 country = "india", 
+                 ageGroup = "adults",
+                 framing = "do you think...?")
