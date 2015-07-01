@@ -61,9 +61,13 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 
 # --- READING IN RAW DATA -----------------------------------------------------
 
-
-
 # ------ study 1 --------------------------------------------------------------
+
+# set study specifications
+study = "1"
+country = "us"
+ageGroup = "adults"
+framing = "does that mean...?"
 
 # read in raw data from qualtrics
 d1.raw <- read.csv("./data/raw/b2b-k_study1_us-adults_mean.csv", 
@@ -113,7 +117,11 @@ for (i in 1:8) {
 
 # recode variables
 d1.5 <- d1.4 %>%
-  mutate(subid = factor(ResponseID), 
+  mutate(study = factor(study),
+         country = factor(country),
+         ageGroup = factor(ageGroup),
+         framing = factor(framing),
+         subid = factor(ResponseID), 
          dateOfTest = parse_date_time(StartDate, orders = "mdyHM"),
          durationOfTest = as.numeric(
            parse_date_time(EndDate, orders = "mdyHM") - 
@@ -132,7 +140,8 @@ d1.5 <- d1.4 %>%
          t6 = as.numeric(t6) - 2.5,
          t7 = as.numeric(t7) - 2.5,
          t8 = as.numeric(t8) - 2.5) %>%
-  select(subid, dateOfTest, durationOfTest, status, sequence, p1:t8)
+  select(study, country, ageGroup, framing, 
+         subid, dateOfTest, durationOfTest, status, sequence, p1:t8)
 
 # remove participants who did not complete session
 d1.6 <- subset(d1.5, status == "complete") %>% select(-status)
@@ -144,8 +153,11 @@ d1.7 <- d1.6 %>%
 
 # make into tidy data
 d1.8 <- d1.7 %>%
-  gather(trialNum, response, p1:t8)
+  gather(trialNum, response, p1:t8) %>%
+  arrange(study, sequence, subid, trialNum)
 
-d1.processed <- d1.8
-rm(d1.raw, d1.0, d1.1, d1.2, d1.3, d1.4, d1.5, d1.6, d1.7, d1.8)
+# finalize data and remove superfluous data objects
+d1 <- d1.8
+rm(d1.raw, d1.0, d1.1, d1.2, d1.3, d1.4, d1.5, d1.6, d1.7, d1.8,
+   study, country, ageGroup, framing)
 
