@@ -61,6 +61,8 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 
 # --- READING IN RAW DATA -----------------------------------------------------
 
+
+
 # ------ study 1 --------------------------------------------------------------
 
 # read in raw data from qualtrics
@@ -140,6 +142,10 @@ d1.7 <- d1.6 %>%
   group_by(sequence) %>%
   sample_n(10, replace = F)
 
-d1.processed <- d1.7
-rm(d1.raw, d1.0, d1.1, d1.2, d1.3, d1.4, d1.5, d1.6, d1.7)
+# make into tidy data
+d1.8 <- d1.7 %>%
+  gather(trialNum, response, p1:t8)
+
+d1.processed <- d1.8
+rm(d1.raw, d1.0, d1.1, d1.2, d1.3, d1.4, d1.5, d1.6, d1.7, d1.8)
 
