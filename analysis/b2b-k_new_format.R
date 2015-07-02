@@ -256,13 +256,9 @@ d2 <- d2.0 %>%
                                       NA)),
          subid = factor(Subj),
 #          dateOfTest = NA, # to prevent deduction of DOB
-#          durationOfTest = NA,
          gender = factor(Gen, levels = c("M", "F"), 
                          labels = c(1:2)),
          raceEthn = factor(Race),
-#          religion = NA,
-#          repeated = NA,
-#          comments = NA,
          sequence = factor(Sequence),
          phase = factor(Phase),
          trialNum = tolower(Trial),
@@ -296,7 +292,8 @@ d0 <- full_join(d1, d1p) %>%
          raceEthn = factor(raceEthn),         
          raceEthn2 = factor(
            ifelse(raceEthn == "C" | raceEthn == "S", "white",
-                  ifelse(raceEthn == "unknown", NA, "of-color"))),
+                  ifelse(raceEthn == "unknown" | raceEthn == "NA", NA, 
+                         "of-color"))),
          raceEthn3 = factor(
            ifelse(raceEthn == "A" | raceEthn == "AAME" | raceEthn == "AH" |
                     raceEthn == "AI" | raceEthn == "CA" | raceEthn == "CCA" |
@@ -304,7 +301,8 @@ d0 <- full_join(d1, d1p) %>%
                     raceEthn == "I" | raceEthn == "IH" | raceEthn == "ME" |
                     raceEthn == "MEI", "some-asian",
                   ifelse(raceEthn == "C" | raceEthn == "S", "white-only",
-                         ifelse(raceEthn == "unknown", NA, "other-nonwhite")))),
+                         ifelse(raceEthn == "unknown" | raceEthn == "NA", NA,
+                                "other-nonwhite")))),
          raceEthn4 = factor(
            ifelse(
              raceEthn == "A", 
