@@ -63,8 +63,8 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 
 # make function for formatting qualtrics data
 # NOTE: requires packages to be installed and loaded (see PRELIMINARIES, above)
-tidyFormat <- function(rawDataFilename, psPerSequence,
-                       study, itemSet, country, ageGroup, framing) {
+tidyFormat <- function(rawDataFilename, study, itemSet, 
+                       country, ageGroup, framing) {
 
   # set study specifications
   study <- study
@@ -174,14 +174,9 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
   
   # remove participants who did not complete session
   d.6 <- subset(d.5, status == "complete") %>% select(-status)
-  
-  # randomly select n participants per sequence
-  d.7 <- d.6 %>%
-    group_by(sequence) %>%
-    sample_n(psPerSequence, replace = F)
-  
+    
   # make into tidy data
-  d.8 <- d.7 %>%
+  d.7 <- d.6 %>%
     gather(trialNum, response, p1:t8) %>%
     mutate(phase = factor(
       ifelse(grepl("p", trialNum) == T, "practice",
@@ -191,7 +186,7 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
     arrange(study, sequence, subid, trialNum)
   
   # return final dataframe
-  return(d.8)
+  return(d.7)
   
   # remove superfluous objects
   rm(d.4, i)
@@ -200,7 +195,6 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
 # ready in data for qualtrics studies
 # ... study 1
 d1 <- tidyFormat(rawDataFilename = "b2b-k_study1_us-adults_mean.csv", 
-                psPerSequence = 10, 
                 study = "1", 
                 itemSet = "cb1",
                 country = "us", 
@@ -209,7 +203,6 @@ d1 <- tidyFormat(rawDataFilename = "b2b-k_study1_us-adults_mean.csv",
 
 # ... study 1'
 d1p <- tidyFormat(rawDataFilename = "b2b-k_study1'_us-adults_mean_arousal.csv", 
-                psPerSequence = 9, 
                 study = "1prime", 
                 itemSet = "cb2",
                 country = "us", 
@@ -218,7 +211,6 @@ d1p <- tidyFormat(rawDataFilename = "b2b-k_study1'_us-adults_mean_arousal.csv",
 
 # ... study 3
 d3 <- tidyFormat(rawDataFilename = "b2b-k_study3_indian-adults_mean.csv", 
-                psPerSequence = 10, 
                 study = "3", 
                 itemSet = "cb1",
                 country = "india", 
@@ -227,7 +219,6 @@ d3 <- tidyFormat(rawDataFilename = "b2b-k_study3_indian-adults_mean.csv",
 
 # ... study 4a
 d4a <- tidyFormat(rawDataFilename = "b2b-k_study4a_us-adults_think.csv", 
-                psPerSequence = 10, 
                 study = "4", 
                 itemSet = "cb1",
                 country = "us", 
@@ -236,7 +227,6 @@ d4a <- tidyFormat(rawDataFilename = "b2b-k_study4a_us-adults_think.csv",
 
 # ... study 4b
 d4b <- tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv", 
-                 psPerSequence = 10, 
                  study = "4", 
                  itemSet = "cb1",
                  country = "india", 
@@ -301,9 +291,13 @@ d <- full_join(d0, cb) %>%
          response) %>% # response
   arrange(study, country, sequence, subid, trialNum)
 
+# check sequence assignment by study
+checkTable <- d %>% group_by(study, country, sequence) %>% select(subid) %>% unique() %>% summarise(count = length(subid))
+# View(checkTable)
+
 # --- WRITING ANONYMIZED CSV --------------------------------------------------
 
 # write data to de-identified csv file
-write.csv(d, "./data/anonymized/mturk_data.csv")
+write.csv(d, "./data/anonymized/b2b-k_adults-data_anonymized.csv")
 
-d = read.csv("./data/anonymized/mturk_data.csv")[-1] # get rid of column of obs numbers
+d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized.csv")[-1] # delete observation numbers
