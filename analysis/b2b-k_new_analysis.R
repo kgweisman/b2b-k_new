@@ -105,10 +105,70 @@ religion <- d %>% distinct(subid) %>% group_by(study, country, religion) %>% sum
 
 # --- STUDY 1 -----------------------------------------------------------------
 
+# ------ planned analyses -----------------------------------------------------
+
+# comparison to neutral
+
+# planned contrasts
+
+# ------ exploratory analyses -------------------------------------------------
+
+# planned contrasts on absolute values
+
 # --- STUDY 1' ----------------------------------------------------------------
+
+# ------ planned analyses -----------------------------------------------------
+
+# comparison to neutral
+
+# planned contrasts
 
 # --- STUDY 2 -----------------------------------------------------------------
 
+# ------ planned analyses -----------------------------------------------------
+
+# comparison to neutral
+
+# planned contrasts
+
+# ------ exploratory analyses -------------------------------------------------
+
+# planned contrasts on absolute values
+
+# race/ethnicity comparison: chi-squared tests
+
+# race/ethnicity comparison: comparison to neutral
+
+# race/ethnicity comparison: planned contrasts
+
+# adult/child comparison: planned contrasts
+
 # --- STUDY 3 -----------------------------------------------------------------
 
+# ------ planned analyses -----------------------------------------------------
+
+# comparison to neutral
+
+# planned contrasts
+
+# ------ exploratory analyses -------------------------------------------------
+
+# planned contrasts on absolute values
+
+# us/india comparison: planned contrasts
+
 # --- STUDY 4 -----------------------------------------------------------------
+
+# ------ planned analyses -----------------------------------------------------
+
+# us/india comparison: comparison to neutral
+
+# us/india comparison: planned contrasts
+
+# us/india comparison: planned contrasts on absolute values
+
+# ------ exploratory analyses -------------------------------------------------
+
+# us/india comparison, framing comparison: planned contrasts
+
+# us/india comparison, framing comparison: planned contrasts on absolute values
