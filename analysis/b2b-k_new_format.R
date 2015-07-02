@@ -18,14 +18,14 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # --- STUDY KEY ---------------------------------------------------------------
 
 # study 1 (2014-04-10)
-# - EXPERIMENTAL SETTING: mturk
+# - EXPERIMENTAL SETTING: mturk/qualtrics
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 1' (2014-05-23) - SUPPLEMENTAL
-# - EXPERIMENTAL SETTING: mturk
+# - EXPERIMENTAL SETTING: mturk/qualtrics
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
@@ -39,21 +39,21 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 3 (2014-06-17)
-# - EXPERIMENTAL SETTING: mturk
+# - EXPERIMENTAL SETTING: mturk/qualtrics
 # - COUNTRY: india
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 4a (2014-06-25)
-# - EXPERIMENTAL SETTING: mturk
+# - EXPERIMENTAL SETTING: mturk/qualtrics
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "do you think...?" 
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 4b (2014-06-25)
-# - EXPERIMENTAL SETTING: mturk
+# - EXPERIMENTAL SETTING: mturk/qualtrics
 # - COUNTRY: india
 # - AGE GROUP: adults
 # - FRAMING: "do you think...?" 
@@ -233,8 +233,50 @@ d4b <- tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv",
                  ageGroup = "adults",
                  framing = "do you think...?")
 
+# read in child data
+d2.raw <- read.csv("./data/raw/b2b-k_study2_us-children_mean.csv")
+
+d2.0 <- d2.raw %>%
+  filter(Subj != "S11" # did not speak english
+         & Subj != "S13" # did not finish
+         & Subj != "S31" # too young (4.2 years old)
+         & Subj != "C16" # did not finish
+         & Subj != "C19" # too young (4.2 years old)
+  )
+  
+d2 <- d2.0 %>%
+  mutate(study = factor("2"),
+         itemSet = factor("cb1"),
+         country = factor("us"),
+         ageGroup = factor("children"),
+         age = as.numeric(Age),
+         framing = factor("does that mean...?"),
+         experimenter = ifelse(grepl("C", Subj) == T, "exp2",
+                               ifelse(grepl("S", Subj) == T, "exp1",
+                                      NA)),
+         subid = factor(Subj),
+#          dateOfTest = NA, # to prevent deduction of DOB
+#          durationOfTest = NA,
+         gender = factor(Gen, levels = c("M", "F"), 
+                         labels = c(1:2)),
+         raceEthn = factor(Race),
+#          religion = NA,
+#          repeated = NA,
+#          comments = NA,
+         sequence = factor(Sequence),
+         phase = factor(Phase),
+         trialNum = tolower(Trial),
+         response = as.numeric(X4ptResponse - 2.5), # center around 0
+         ynResponse = factor(tolower(YNResponse)),
+         trialComments = as.character(Scomments)) %>% 
+  select(study, itemSet, country, ageGroup, framing, experimenter,
+         subid, age, gender, raceEthn, sequence, 
+         phase, trialNum, ynResponse, response, trialComments) %>%
+  arrange(sequence, trialNum, subid)
+
 # join all together!
 d0 <- full_join(d1, d1p) %>% 
+  full_join(d2) %>%
   full_join(d3) %>% 
   full_join(d4a) %>% 
   full_join(d4b) %>%
@@ -250,7 +292,47 @@ d0 <- full_join(d1, d1p) %>%
                                       "islam", "jainism", "judaism", "sikhism",
                                       "other", "non-religious")),
          repeated = factor(repeated, levels = c(1:3),
-                           labels = c("no", "yes", "unsure"))) # self-report
+                           labels = c("no", "yes", "unsure")), # self-reported
+         raceEthn = factor(raceEthn),         
+         raceEthn2 = factor(
+           ifelse(raceEthn == "C" | raceEthn == "S", "white",
+                  ifelse(raceEthn == "unknown", NA, "of-color"))),
+         raceEthn3 = factor(
+           ifelse(raceEthn == "A" | raceEthn == "AAME" | raceEthn == "AH" |
+                    raceEthn == "AI" | raceEthn == "CA" | raceEthn == "CCA" |
+                    raceEthn == "CHA" | raceEthn == "CHI" | raceEthn == "CME" |
+                    raceEthn == "I" | raceEthn == "IH" | raceEthn == "ME" |
+                    raceEthn == "MEI", "some-asian",
+                  ifelse(raceEthn == "C" | raceEthn == "S", "white-only",
+                         ifelse(raceEthn == "unknown", NA, "other-nonwhite")))),
+         raceEthn4 = factor(
+           ifelse(
+             raceEthn == "A", 
+             "east-asian",
+             ifelse(raceEthn == "AA", 
+                    "african-american",
+                    ifelse(raceEthn == "C" | raceEthn == "S", 
+                           "white", # S for "Swedish"
+                           ifelse(raceEthn == "H", 
+                                  "hispanic-latino",
+                                  ifelse(raceEthn == "I", 
+                                         "indian",
+                                         ifelse(raceEthn == "ME", 
+                                                "middle-eastern",
+                                                ifelse(raceEthn == "unknown", 
+                                                       "unknown",
+                                                       ifelse(raceEthn == "NA", 
+                                                              NA,
+                                                              "multi"))))))))),
+         sequence = factor(sequence),
+         experimenter = factor(experimenter),
+         trialNum = factor(trialNum),
+         ynResponse = factor(
+           ifelse(is.na(ynResponse) == T,
+                  ifelse(response < 0, "n", 
+                         ifelse(response > 0, "y", NA)),
+                  ynResponse))) %>%
+  arrange(study, country, sequence, subid, trialNum)
 
 # --- ADDING STIMULUS INFO (BY SEQUENCE) --------------------------------------
 
@@ -284,15 +366,19 @@ d <- full_join(d0, cb) %>%
          trialNum = as.numeric(trialNum)) %>%
   select(study, country, ageGroup, framing, itemSet, # study info
          subid, dateOfTest, durationOfTest, # session info
-         gender, religion, repeated, comments, # p info
-         sequence, phase, trialNum, # trial info
+         age, gender, raceEthn, raceEthn2, raceEthn3, raceEthn4, # p info
+         religion, repeated, comments, # p info, continued
+         experimenter, sequence, phase, trialNum, # trial info
          factCat, factSub, factText, # trial info, continued
          questionCat, questionSub, questionText, # trial info, continued
-         response) %>% # response
+         ynResponse, response, trialComments) %>% # p responses
   arrange(study, country, sequence, subid, trialNum)
 
 # check sequence assignment by study
-checkTable <- d %>% group_by(study, country, sequence) %>% select(subid) %>% unique() %>% summarise(count = length(subid))
+checkTable <- d %>% 
+  group_by(study, country, sequence) %>% 
+  select(subid) %>% unique() %>% 
+  summarise(count = length(subid))
 # View(checkTable)
 
 # --- WRITING ANONYMIZED CSV --------------------------------------------------
@@ -301,3 +387,4 @@ checkTable <- d %>% group_by(study, country, sequence) %>% select(subid) %>% uni
 write.csv(d, "./data/anonymized/b2b-k_adults-data_anonymized.csv")
 
 d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized.csv")[-1] # delete observation numbers
+

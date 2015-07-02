@@ -66,7 +66,7 @@ d0 = read.csv("./data/anonymized/b2b-k_adults-data_anonymized.csv")[-1] # delete
 
 # set number of participants to select per sequence
 psPerSequence = data.frame(study = levels(d0$study),
-                      n = c(10, 9, 10, 10))
+                      n = c(10, 9, 8, 10, 10))
 
 # randomly choose n participants from each sequence for each study
 subidList <- data.frame()
