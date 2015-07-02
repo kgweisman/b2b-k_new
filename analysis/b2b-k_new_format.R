@@ -301,3 +301,9 @@ d <- full_join(d0, cb) %>%
          response) %>% # response
   arrange(study, country, sequence, subid, trialNum)
 
+# --- WRITING ANONYMIZED CSV --------------------------------------------------
+
+# write data to de-identified csv file
+write.csv(d, "./data/anonymized/mturk_data.csv")
+
+d = read.csv("./data/anonymized/mturk_data.csv")[-1] # get rid of column of obs numbers
