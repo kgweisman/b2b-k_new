@@ -218,7 +218,10 @@ d4b <- tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv",
                  framing = "do you think...?")
 
 # join all together!
-d <- full_join(d1, d1p) %>% full_join(d3) %>% full_join(d4a) %>% full_join(d4b) %>%
+d0 <- full_join(d1, d1p) %>% 
+  full_join(d3) %>% 
+  full_join(d4a) %>% 
+  full_join(d4b) %>%
   mutate(study = factor(study),
          itemSet = factor(itemSet),
          country = factor(country),
@@ -247,4 +250,12 @@ cb <- full_join(cb1, cb2) %>%
          factCat, factSub, factText, 
          questionCat, questionSub, questionText)
 
-temp <- inner_join(cb, d)
+# add counterbalancing info to dataset
+d <- full_join(cb, d0) %>%
+  select(study, country, ageGroup, framing, itemSet, # study info
+         subid, dateOfTest, durationOfTest, sequence, # participant info
+         trialNum, factCat, factSub, factText, # trial info 
+         questionCat, questionSub, questionText, # trial info, continud
+         response) %>% # response
+  arrange(study, country, sequence, subid, trialNum)
+
