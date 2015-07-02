@@ -236,7 +236,7 @@ d4b <- tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv",
 # read in child data
 d2.raw <- read.csv("./data/raw/b2b-k_study2_us-children_mean.csv")
 
-d2.0 <- d2.raw %>%
+d2.0 <- d2.raw %>% # exclude participants by hand: see justification below
   filter(Subj != "S11" # did not speak english
          & Subj != "S13" # did not finish
          & Subj != "S31" # too young (4.2 years old)
@@ -251,8 +251,8 @@ d2 <- d2.0 %>%
          ageGroup = factor("children"),
          age = as.numeric(Age),
          framing = factor("does that mean...?"),
-         experimenter = ifelse(grepl("C", Subj) == T, "exp2",
-                               ifelse(grepl("S", Subj) == T, "exp1",
+         experimenter = ifelse(grepl("C", Subj) == T, "exp2", # C Tran
+                               ifelse(grepl("S", Subj) == T, "exp1", # K Weisman
                                       NA)),
          subid = factor(Subj),
 #          dateOfTest = NA, # to prevent deduction of DOB
@@ -321,7 +321,7 @@ d0 <- full_join(d1, d1p) %>%
                                                        "unknown",
                                                        ifelse(raceEthn == "NA", 
                                                               NA,
-                                                              "multi"))))))))),
+                                                              "multiracial"))))))))),
          sequence = factor(sequence),
          experimenter = factor(experimenter),
          trialNum = factor(trialNum),
