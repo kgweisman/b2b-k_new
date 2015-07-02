@@ -22,51 +22,53 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
-# - AFFECT ITEMS: standard set (positive/negative valence)
+# - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 1' (2014-05-23) - SUPPLEMENTAL
 # - EXPERIMENTAL SETTING: mturk
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
-# - AFFECT ITEMS: alternative set (positive/negative valence, high/low arousal)
+# - ITEM SET: cb2 (affect: positive/negative valence & high/low arousal)
 
 # study 2 (spring 2014 - fall 2014)
 # - EXPERIMENTAL SETTING: university preschool
 # - COUNTRY: us
 # - AGE GROUP: children
 # - FRAMING: "does that mean...?" 
-# - AFFECT ITEMS: standard set (positive/negative valence)
+# - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 3 (2014-06-17)
 # - EXPERIMENTAL SETTING: mturk
 # - COUNTRY: india
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
-# - AFFECT ITEMS: standard set (positive/negative valence)
+# - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 4a (2014-06-25)
 # - EXPERIMENTAL SETTING: mturk
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "do you think...?" 
-# - AFFECT ITEMS: standard set (positive/negative valence)
+# - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 4b (2014-06-25)
 # - EXPERIMENTAL SETTING: mturk
 # - COUNTRY: india
 # - AGE GROUP: adults
 # - FRAMING: "do you think...?" 
-# - AFFECT ITEMS: standard set (positive/negative valence)
+# - ITEM SET: cb1 (affect: positive/negative valence)
 
 # --- READING IN RAW DATA -----------------------------------------------------
 
 # make function for formatting qualtrics data
+# NOTE: requires packages to be installed and loaded (see PRELIMINARIES, above)
 tidyFormat <- function(rawDataFilename, psPerSequence,
-                       study, country, ageGroup, framing) {
+                       study, itemSet, country, ageGroup, framing) {
 
   # set study specifications
   study <- study
+  itemSet <- itemSet
   country <- country
   ageGroup <- ageGroup
   framing <- framing
@@ -123,6 +125,7 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
   # recode variables
   d.5 <- d.4 %>%
     mutate(study = factor(study),
+           itemSet = factor(itemSet),
            country = factor(country),
            ageGroup = factor(ageGroup),
            framing = factor(framing),
@@ -145,7 +148,7 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
            t6 = as.numeric(t6) - 2.5,
            t7 = as.numeric(t7) - 2.5,
            t8 = as.numeric(t8) - 2.5) %>%
-    select(study, country, ageGroup, framing, 
+    select(study, itemSet, country, ageGroup, framing, 
            subid, dateOfTest, durationOfTest, status, sequence, p1:t8)
   
   # remove participants who did not complete session
@@ -170,48 +173,78 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
 
 # ready in data for qualtrics studies
 # ... study 1
-d1 = tidyFormat(rawDataFilename = "b2b-k_study1_us-adults_mean.csv", 
+d1 <- tidyFormat(rawDataFilename = "b2b-k_study1_us-adults_mean.csv", 
                 psPerSequence = 10, 
                 study = "1", 
+                itemSet = "cb1",
                 country = "us", 
                 ageGroup = "adults",
                 framing = "does that mean...?")
 
 # ... study 1'
-d1p = tidyFormat(rawDataFilename = "b2b-k_study1'_us-adults_mean_arousal.csv", 
+d1p <- tidyFormat(rawDataFilename = "b2b-k_study1'_us-adults_mean_arousal.csv", 
                 psPerSequence = 9, 
                 study = "1prime", 
+                itemSet = "cb2",
                 country = "us", 
                 ageGroup = "adults",
                 framing = "does that mean...?")
 
 # ... study 3
-d3 = tidyFormat(rawDataFilename = "b2b-k_study3_indian-adults_mean.csv", 
+d3 <- tidyFormat(rawDataFilename = "b2b-k_study3_indian-adults_mean.csv", 
                 psPerSequence = 10, 
-                study = "1", 
+                study = "3", 
+                itemSet = "cb1",
                 country = "india", 
                 ageGroup = "adults",
                 framing = "does that mean...?")
 
 # ... study 4a
-d4a = tidyFormat(rawDataFilename = "b2b-k_study4a_us-adults_think.csv", 
+d4a <- tidyFormat(rawDataFilename = "b2b-k_study4a_us-adults_think.csv", 
                 psPerSequence = 10, 
                 study = "4", 
+                itemSet = "cb1",
                 country = "us", 
                 ageGroup = "adults",
                 framing = "do you think...?")
 
 # ... study 4b
-d4b = tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv", 
+d4b <- tidyFormat(rawDataFilename = "b2b-k_study4b_indian-adults_think.csv", 
                  psPerSequence = 10, 
                  study = "4", 
+                 itemSet = "cb1",
                  country = "india", 
                  ageGroup = "adults",
                  framing = "do you think...?")
 
 # join all together!
-d = full_join(d1, d1p) %>% full_join(d3) %>% full_join(d4a) %>% full_join(d4b) %>%
+d <- full_join(d1, d1p) %>% full_join(d3) %>% full_join(d4a) %>% full_join(d4b) %>%
   mutate(study = factor(study),
+         itemSet = factor(itemSet),
          country = factor(country),
          framing = factor(framing),
          subid = factor(subid))
+
+# --- ADDING STIMULUS INFO (BY SEQUENCE) --------------------------------------
+
+# load counterbalancing tables
+# ... studies 1, 2, 3, 4
+cb1 <- read.csv("./design/cb1.csv", colClasses = "factor") %>%
+  mutate(itemSet = "cb1")
+
+# ... study 1'
+cb2 <- read.csv("./design/cb2.csv", colClasses = "factor") %>%
+  mutate(itemSet = "cb2")
+
+# join counterbalancing tables together, separate out category and subcategory
+cb <- full_join(cb1, cb2) %>% 
+  mutate(factSub = factor(factSub),
+         factText = factor(factText),
+         questionSub = factor(questionSub),
+         questionText = factor(questionText),
+         itemSet = factor(itemSet)) %>%
+  select(sequence, itemSet, trialNum, 
+         factCat, factSub, factText, 
+         questionCat, questionSub, questionText)
+
+temp <- inner_join(cb, d)
