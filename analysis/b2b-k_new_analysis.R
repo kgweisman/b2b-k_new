@@ -1,51 +1,114 @@
-########################################################### preliminaries #####
-
-# --- PACKAGES & FUNCTIONS ----------------------------------------------------
+# --- PRELIMINARIES -----------------------------------------------------------
 
 # libraries
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(lme4)
-library(psych)
 library(stats)
+library(stringr)
+library(lubridate)
 
 # clear environment
 rm(list=ls())
 
-# clear graphics
-dev.off()
+# set working directory
+setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_new/")
+
+# --- STUDY KEY ---------------------------------------------------------------
+
+# study 1 (2014-04-10)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: us
+# - AGE GROUP: adults
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 1' (2014-05-23) - SUPPLEMENTAL
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: us
+# - AGE GROUP: adults
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb2 (affect: positive/negative valence & high/low arousal)
+
+# study 2 (spring 2014 - fall 2014)
+# - EXPERIMENTAL SETTING: university preschool
+# - COUNTRY: us
+# - AGE GROUP: children
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 3 (2014-06-17)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: india
+# - AGE GROUP: adults
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 4a (2014-06-25)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: us
+# - AGE GROUP: adults
+# - FRAMING: "do you think...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 4b (2014-06-25)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: india
+# - AGE GROUP: adults
+# - FRAMING: "do you think...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
 
 # --- IMPORTING DATA ----------------------------------------------------------
 
 # read in data
-d = read.csv("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_new/data/anonymized/TEMP_b2b-k_study2_us-children_mean.csv")[-1] # get rid of column of obs numbers
+d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv")[-1] # delete observation numbers
 
-glimpse(d)
-
-########################################################### summary stats #####
+# glimpse(d)
 
 # --- DEMOGRAPHICS ------------------------------------------------------------
 
-# study 1: us adults, "does that mean?" framing
-demo = dd %>% distinct(subid)
+# sample size by study
+sampleSize <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(n = length(subid))
+# print(sampleSize)
 
-# total n
-demo %>% summarise(n = length(subid))
+# sequence assignment by study
+sequenceAssign <- d %>% distinct(subid) %>% group_by(study, country, sequence) %>% summarise(n = length(subid))
+# print(sequenceAssign)
 
-# condition assignment
-dd %>% group_by(sequence) %>% distinct(subid) %>% summarise(n = length(subid))
+# duration by study (minutes; adults only)
+duration <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(durationOfTest), sd = sd(durationOfTest))
+# print(duration)
 
-# gender
-demo %>% count(gender)
+# gender by study
+gender <- d %>% distinct(subid) %>% group_by(study, country, gender) %>% summarise(n = length(gender))
+# print(gender)
 
-# ethnicity
-demo %>% count(ethnicity)
+# age by study (years; children only)
+age <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(age), sd = sd(age), min = min(age), max = max(age))
+# print(age)
 
-# age
-demo %>% summarise(mean_age = mean(ageCalc, na.rm = T), sd_age = sd(ageCalc, na.rm = T))
-qplot(demo$ageCalc)
+# race/ethnicity by study
+# ... finest grain
+raceEthn4 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn4) %>% summarise(n = length(raceEthn4))
+# print(raceEthn4)
+# ... white-only/some-eastern/other
+raceEthn3 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn3) %>% summarise(n = length(raceEthn3))
+# print(raceEthn3)
+# ... coarsest grain
+raceEthn2 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn2) %>% summarise(n = length(raceEthn2))
+# print(raceEthn2)
 
-# demo %>% filter(age < 100) %>% summarise(mean_age = mean(age, na.rm = T), sd_age = sd(age, na.rm = T))
-# qplot(demo$age[demo$age < 100])
+# religion by study (study 4 only)
+religion <- d %>% distinct(subid) %>% group_by(study, country, religion) %>% summarise(n = length(religion))
+# print(religion)
 
+# --- STUDY 1 -----------------------------------------------------------------
+
+# --- STUDY 1' ----------------------------------------------------------------
+
+# --- STUDY 2 -----------------------------------------------------------------
+
+# --- STUDY 3 -----------------------------------------------------------------
+
+# --- STUDY 4 -----------------------------------------------------------------
