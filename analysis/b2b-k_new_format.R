@@ -105,19 +105,35 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
   
   # eliminate superfluous columns (no data)
   d.3 <- d.2 %>% 
-    select(ResponseID, StartDate, EndDate, Finished, Sequence, intro_text:comments) %>%
-    select(-ends_with("text"))
+    select(-ResponseSet, -Name, -ExternalDataReference, -EmailAddress, -IPAddress,
+           -Status, -mTurkCODE, -ends_with("text"))
   
   # separate by sequence
   d.4 <- data.frame()
   for (i in 1:8) {
-    temp = subset(d.3, Sequence == i)
+    temp <- subset(d.3, Sequence == i)
     temp[temp == ""] <- NA
     temp <- Filter(function(x)!all(is.na(x)), temp)
-    names(temp) = c(names(d.3[1:5]),
+    ifelse("gender_response" %in% names(temp),
+           temp <- temp %>% mutate(gender = gender_response),
+           temp <- temp %>% mutate(gender = NA))
+    ifelse("religion_response" %in% names(temp),
+           temp <- temp %>% mutate(religion = religion_response),
+           temp <- temp %>% mutate(religion = NA))
+    ifelse("repeat_response_response" %in% names(temp),
+           temp <- temp %>% mutate(repeated = repeat_response_response),
+           temp <- temp %>% mutate(repeated = NA))
+    ifelse("comments" %in% names(temp),
+           temp <- temp %>% mutate(comments = comments),
+           temp <- temp %>% mutate(comments = NA))
+    temp <- temp %>% 
+      select(ResponseID, StartDate, EndDate, Finished, Sequence, 
+             starts_with("practice"), starts_with("Q"),
+             comments, gender, religion, repeated)
+    names(temp) <- c(names(d.3[1:5]),
                     "p1", "p2", "p3", # practice trials
                     "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", # test trials
-                    "comments")
+                    "comments", "gender", "religion", "repeated") # self-reports
     d.4 <- bind_rows(d.4, temp)
     rm(temp, i)
   }
@@ -136,6 +152,9 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
                parse_date_time(StartDate, orders = "mdyHM"))/60,
            status = factor(ifelse(is.na(t8) == T, "partial", "complete")),
            sequence = factor(Sequence),
+           gender = factor(gender),
+           religion = factor(religion),
+           repeated = factor(repeated),
            # center 4-point response scale around 0
            p1 = as.numeric(p1) - 2.5, 
            p2 = as.numeric(p2) - 2.5,
@@ -149,7 +168,9 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
            t7 = as.numeric(t7) - 2.5,
            t8 = as.numeric(t8) - 2.5) %>%
     select(study, itemSet, country, ageGroup, framing, 
-           subid, dateOfTest, durationOfTest, status, sequence, p1:t8)
+           subid, dateOfTest, durationOfTest, status,
+           gender, religion, repeated, comments,
+           sequence, p1:t8)
   
   # remove participants who did not complete session
   d.6 <- subset(d.5, status == "complete") %>% select(-status)
@@ -162,6 +183,11 @@ tidyFormat <- function(rawDataFilename, psPerSequence,
   # make into tidy data
   d.8 <- d.7 %>%
     gather(trialNum, response, p1:t8) %>%
+    mutate(phase = factor(
+      ifelse(grepl("p", trialNum) == T, "practice",
+             ifelse(grepl("t", trialNum) == T, "test",
+                          NA)))) %>%
+    select(study:sequence, phase, trialNum:response) %>%
     arrange(study, sequence, subid, trialNum)
   
   # return final dataframe
@@ -226,7 +252,15 @@ d0 <- full_join(d1, d1p) %>%
          itemSet = factor(itemSet),
          country = factor(country),
          framing = factor(framing),
-         subid = factor(subid))
+         subid = factor(subid),
+         gender = factor(gender, levels = c(1:3),
+                         labels = c("male", "female", "other/skip")),
+         religion = factor(religion, levels = c(1:9),
+                           labels = c("buddhism", "christianity", "hinduism", 
+                                      "islam", "jainism", "judaism", "sikhism",
+                                      "other", "non-religious")),
+         repeated = factor(repeated, levels = c(1:3),
+                           labels = c("no", "yes", "unsure"))) # self-report
 
 # --- ADDING STIMULUS INFO (BY SEQUENCE) --------------------------------------
 
@@ -245,17 +279,25 @@ cb <- full_join(cb1, cb2) %>%
          factText = factor(factText),
          questionSub = factor(questionSub),
          questionText = factor(questionText),
-         itemSet = factor(itemSet)) %>%
-  select(sequence, itemSet, trialNum, 
+         itemSet = factor(itemSet),
+         phase = factor(phase),
+         trialNum = factor(trialNum)) %>% # recode trials as numeric
+  select(sequence, itemSet, phase, trialNum, 
          factCat, factSub, factText, 
          questionCat, questionSub, questionText)
 
 # add counterbalancing info to dataset
-d <- full_join(cb, d0) %>%
+d <- full_join(d0, cb) %>% 
+  mutate(itemSet = factor(itemSet),
+         sequence = factor(sequence),
+         trial = factor(trialNum),
+         trialNum = as.numeric(trialNum)) %>%
   select(study, country, ageGroup, framing, itemSet, # study info
-         subid, dateOfTest, durationOfTest, sequence, # participant info
-         trialNum, factCat, factSub, factText, # trial info 
-         questionCat, questionSub, questionText, # trial info, continud
+         subid, dateOfTest, durationOfTest, # session info
+         gender, religion, repeated, comments, # p info
+         sequence, phase, trialNum, # trial info
+         factCat, factSub, factText, # trial info, continued
+         questionCat, questionSub, questionText, # trial info, continued
          response) %>% # response
   arrange(study, country, sequence, subid, trialNum)
 
