@@ -259,7 +259,7 @@ d2 <- d2.0 %>%
          gender = factor(Gen, levels = c("M", "F"), 
                          labels = c(1:2)),
          raceEthn = factor(Race),
-         sequence = factor(Sequence),
+         sequence = factor(gsub("s", "", Sequence)),
          phase = factor(Phase),
          trialNum = tolower(Trial),
          response = as.numeric(X4ptResponse - 2.5), # center around 0
