@@ -66,33 +66,7 @@ d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv"
 
 # glimpse(d)
 
-# --- SETUP -------------------------------------------------------------------
-
-# make summary table (collapse across race/ethncity)
-sumTable <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  group_by(study, ageGroup, country, framing, factCat, questionCat) %>%
-  summarise(mean = mean(response, na.rm = T),
-            sd = sd(response, na.rm = T),
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError)
-sumTable
-
-# make summary table (separate by race/ethncity)
-sumTableRE <- d %>%
-  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, factCat, questionCat) %>%
-  summarise(mean = mean(response, na.rm = T),
-            sd = sd(response, na.rm = T),
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError)
-sumTableRE
+# --- PLOTTING FUNCTIONS ------------------------------------------------------
 
 # make plotting function for plotting all possible fact-question pairings
 plotFQP <- function(studyNum, countryName, ageGroup) {
@@ -126,7 +100,7 @@ plotFcompAge <- function(studyNum) {
 
 # make plotting function comparing fact-question pairings across race/ethnicity
 plotFcompRE <- function(studyNum) {
-  levels(sumTableRE$raceEthn2) = c("of-color", "white")
+  levels(sumTableRE$ageGroup) = c("of-color", "white")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(sumTableRE, 
                             study == studyNum[1] | study == studyNum[2])) +
@@ -163,7 +137,11 @@ plotFformat <- function(plot) {
   studyNum <- levels(factor(plot$data$study))
   countryName <- levels(factor(plot$data$country))
   ageGroup <- levels(factor(plot$data$ageGroup))
-  raceEthn2 <- ifelse(is.null(levels(factor(plot$data$raceEthn2))), "NA", levels(factor(plot$data$raceEthn2)))
+  if (is.null(plot$data$raceEthn2)) {
+    raceEthn2 <- "NA"
+  } else {
+    raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
+  }
   g <- plot +
         coord_cartesian(ylim = c(-1.5, 1.5)) +
         theme_bw() +
@@ -204,6 +182,34 @@ plotFformat <- function(plot) {
   }
   return(g)
 }
+
+# --- SUMMARY TABLES BY FACT-QUESTION PAIR ------------------------------------
+
+# make summary table (collapse across race/ethncity)
+sumTable <- d %>%
+  filter(study != "1prime" & phase == "test") %>%
+  group_by(study, ageGroup, country, framing, factCat, questionCat) %>%
+  summarise(mean = mean(response, na.rm = T),
+            sd = sd(response, na.rm = T),
+            n = length(response[is.na(response) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError)
+sumTable
+
+# make summary table (separate by race/ethncity)
+sumTableRE <- d %>%
+  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, factCat, questionCat) %>%
+  summarise(mean = mean(response, na.rm = T),
+            sd = sd(response, na.rm = T),
+            n = length(response[is.na(response) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError)
+sumTableRE
 
 # ------ PLOTS ----------------------------------------------------------------
 
