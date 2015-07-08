@@ -86,37 +86,114 @@ plotFQP <- function(studyNum, countryName, ageGroup) {
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(sumTable, 
                             study == studyNum & country == countryName)) +
-    coord_cartesian(ylim = c(-1.5, 1.5)) +
-    theme_bw() +
-    theme(text = element_text(size = 20),
-          axis.text = element_text(size = 15),
-          axis.title = element_text(size = 20),
-          axis.text.x = element_text(size = 20),
-          legend.position = "top",
-          legend.text = element_text(size = 15),
-          legend.title = element_text(size = 15),
-          plot.title = element_text(size = 20)) +
     geom_bar(aes(fill = questionCat), 
              colour = "black", position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position=position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2) +
-    labs(title = paste0("Inferences by Fact and Question Category: Study ", studyNum, " (", ifelse(countryName == "us", "US ", "Indian "), str_to_title(ageGroup), ")"), 
-         x = "Fact Category", 
-         y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
-    scale_x_discrete(labels = c("Affect", "Autonomy", "Perception", "Inanimate\nMaterial")) +
-    scale_fill_grey(name = "Question Category", 
-                    labels = c(" Affect ", " Autonomy ", 
-                                 " Perception ", " Inanimate Material "))
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plotting function comparing fact-question pairings across age groups
+plotFcompAge <- function(studyNum) {
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+              data = subset(sumTable, 
+                            study == studyNum[1] | study == studyNum[2])) +
+    facet_grid(ageGroup ~ .,
+               labeller = labeller(ageGroup = c("adults" = "US Adults", 
+                                               "children" = "US Children"))) +
+    geom_bar(aes(fill = questionCat), 
+             colour = "black", position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plotting function comparing fact-question pairings across countries
+plotFcompCountry <- function(studyNum) {
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+              data = subset(sumTable, 
+                            study == studyNum[1] | study == studyNum[2])) +
+    facet_grid(country ~ .,
+               labeller = labeller(country = c("india" = "Indian Adults", 
+                                               "us" = "US Adults"))) +
+    geom_bar(aes(fill = questionCat), 
+             colour = "black", position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plot-formatting function
+plotFformat <- function(plot) {
+  studyNum <- levels(factor(plot$data$study))
+  countryName <- levels(factor(plot$data$country))
+  ageGroup <- levels(factor(plot$data$ageGroup))
+  g <- plot +
+        coord_cartesian(ylim = c(-1.5, 1.5)) +
+        theme_bw() +
+        theme(text = element_text(size = 20),
+              axis.text = element_text(size = 15),
+              axis.title = element_text(size = 20),
+              axis.text.x = element_text(size = 20),
+              legend.position = "top",
+              legend.text = element_text(size = 15),
+              legend.title = element_text(size = 15),
+              plot.title = element_text(size = 20),
+              strip.text = element_text(size = 20)) +
+        labs(x = "Fact Category", 
+             y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
+      scale_x_discrete(labels = c("Affect", "Autonomy", 
+                                  "Perception", "Inanimate\nMaterial")) +
+      scale_fill_grey(name = "Question Category", 
+                      labels = c(" Affect ", " Autonomy ", 
+                                   " Perception ", " Inanimate Material "))
+  if (length(studyNum) == 1) {
+    if (length(countryName) == 1 & length(ageGroup) == 1) {
+      g <- g + 
+        labs(title = paste0("Inferences by Fact and Question Category:\nStudy ",
+                            studyNum, " (",
+                            ifelse(countryName == "us", "US ", "Indian "),
+                            str_to_title(ageGroup), ")"))
+            
+    } else {
+      g <- g + 
+        labs(title = paste0("Inferences by Fact and Question Category: Study ",
+                            studyNum))    
+    }
+  } else {
+    g <- g + 
+      labs(title = paste0("Inferences by Fact and Question Category: Studies ",
+                          studyNum[1], " & ", studyNum[2]))
+  }
   return(g)
 }
 
 # ------ PLOTS ----------------------------------------------------------------
 
-# all possible fact-question pairings
-g1 <- plotFQP("1", "us", "adults"); g1
-# g1prime <- plotFQP("1prime", "us", "adults"); g1prime
-g2 <- plotFQP("2", "us", "children"); g2
-g3 <- plotFQP("3", "india", "adults"); g3
-g4us <- plotFQP("4", "us", "adults"); g4us
-g4india <- plotFQP("4", "india", "adults"); g4india
+# plot all possible fact-question pairings, by individual study
+g1 <- plotFformat(plotFQP(studyNum = "1", 
+                          countryName = "us", 
+                          ageGroup = "adults")); g1
+# g1prime <- plotFformat(plotFQP(studyNum = "1prime", 
+#                           countryName = "us", 
+#                           ageGroup = "adults")); g1prime
+g2 <- plotFformat(plotFQP(studyNum = "2", 
+                          countryName = "us", 
+                          ageGroup = "children")); g2
+g3 <- plotFformat(plotFQP(studyNum = "3", 
+                          countryName = "india", 
+                          ageGroup = "adults")); g3
+g4us <- plotFformat(plotFQP(studyNum = "4", 
+                          countryName = "us", 
+                          ageGroup = "adults")); g4us
+g4india <- plotFformat(plotFQP(studyNum = "4", 
+                            countryName = "india", 
+                            ageGroup = "adults")); g4india
+
+# plot 2-way comparisons of all possible fact-quesiton pairings
+g12 <- plotFformat(plotFcompAge(studyNum = c("1", "2"))); g12
+g13 <- plotFformat(plotFcompCountry(studyNum = c("1", "3"))); g13
+g4all <- plotFformat(plotFcompCountry(studyNum = c("4", "4"))); g4all
