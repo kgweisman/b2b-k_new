@@ -75,7 +75,7 @@ sumTable <- d %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
             n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/n,
+  mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
          upperB = mean + marginError)
@@ -96,7 +96,8 @@ plotFQP <- function(studyNum, countryName, ageGroup) {
           legend.text = element_text(size = 15),
           legend.title = element_text(size = 15),
           plot.title = element_text(size = 20)) +
-    geom_bar(aes(fill = questionCat), position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), 
+             colour = "black", position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position=position_dodge(0.9), width = .2, size = .3) +
     geom_hline(yintercept = 0, linetype = 2) +
