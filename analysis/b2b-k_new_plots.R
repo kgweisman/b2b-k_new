@@ -132,6 +132,26 @@ plotFcompCountry <- function(studyNum) {
   return(g)
 }
 
+# make plotting function comparing fact-question pairings across countries
+plotFcompFraming <- function(studyNum) {
+  levels(sumTable$country) = c("india", "us")
+  levels(sumTable$framing) = c("does that mean...?", "do you think...?")
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+              data = subset(sumTable, study == studyNum[1] | 
+                              study == studyNum[2] | study == studyNum[3])) +
+    facet_grid(country ~ framing,
+               labeller = labeller(
+                 country = c("india" = "Indian Adults", "us" = "US Adults"),
+                 framing = c("do you think...?" = "Do you think...?",
+                             "does that mean...?" = "Does that mean...?"))) +
+    geom_bar(aes(fill = questionCat), 
+             colour = "black", position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
 # make plot-formatting function
 plotFformat <- function(plot) {
   studyNum <- levels(factor(plot$data$study))
@@ -176,9 +196,16 @@ plotFformat <- function(plot) {
                             studyNum))    
     }
   } else {
+    # make string of study labels
+    studies <- NULL
+    for(i in 1:(length(studyNum) - 1)) {
+      studies <- paste(studies, studyNum[i], sep = ", ")
+    }
+    studies <- paste(studies, studyNum[length(studyNum)], sep = ", & ")
+    studies <- substring(studies, first = 3)
     g <- g + 
       labs(title = paste0("Inferences by Fact and Question Category: Studies ",
-                          studyNum[1], " & ", studyNum[2]))
+                          studies))
   }
   return(g)
 }
@@ -227,3 +254,5 @@ g2re <- plotFformat(plotFcompRE(studyNum = c("2", "2"))); g2re
 g13 <- plotFformat(plotFcompCountry(studyNum = c("1", "3"))); g13
 g4all <- plotFformat(plotFcompCountry(studyNum = c("4", "4"))); g4all
 
+# plot 4-way comparison of framing by country (adults)
+g134 <- plotFformat(plotFcompFraming(studyNum = c("1", "3", "4"))); g134
