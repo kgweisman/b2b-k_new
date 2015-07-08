@@ -124,23 +124,6 @@ plotFcompAge <- function(studyNum) {
   return(g)
 }
 
-# make plotting function comparing fact-question pairings across countries
-plotFcompCountry <- function(studyNum) {
-  levels(sumTable$country) = c("india", "us")
-  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTable, 
-                            study == studyNum[1] | study == studyNum[2])) +
-    facet_grid(country ~ .,
-               labeller = labeller(country = c("india" = "Indian Adults", 
-                                               "us" = "US Adults"))) +
-    geom_bar(aes(fill = questionCat), 
-             colour = "black", position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
-  return(g)
-}
-
 # make plotting function comparing fact-question pairings across race/ethnicity
 plotFcompRE <- function(studyNum) {
   levels(sumTableRE$raceEthn2) = c("of-color", "white")
@@ -158,12 +141,29 @@ plotFcompRE <- function(studyNum) {
   return(g)
 }
 
+# make plotting function comparing fact-question pairings across countries
+plotFcompCountry <- function(studyNum) {
+  levels(sumTable$country) = c("india", "us")
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+              data = subset(sumTable, 
+                            study == studyNum[1] | study == studyNum[2])) +
+    facet_grid(country ~ .,
+               labeller = labeller(country = c("india" = "Indian Adults", 
+                                               "us" = "US Adults"))) +
+    geom_bar(aes(fill = questionCat), 
+             colour = "black", position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
 # make plot-formatting function
 plotFformat <- function(plot) {
   studyNum <- levels(factor(plot$data$study))
   countryName <- levels(factor(plot$data$country))
   ageGroup <- levels(factor(plot$data$ageGroup))
-  raceEthn2 <- levels(factor(plot$data$raceEthn2))
+  raceEthn2 <- ifelse(is.null(levels(factor(plot$data$raceEthn2))), "NA", levels(factor(plot$data$raceEthn2)))
   g <- plot +
         coord_cartesian(ylim = c(-1.5, 1.5)) +
         theme_bw() +
@@ -208,27 +208,16 @@ plotFformat <- function(plot) {
 # ------ PLOTS ----------------------------------------------------------------
 
 # plot all possible fact-question pairings, by individual study
-g1 <- plotFformat(plotFQP(studyNum = "1", 
-                          countryName = "us", 
-                          ageGroup = "adults")); g1
-# g1prime <- plotFformat(plotFQP(studyNum = "1prime", 
-#                           countryName = "us", 
-#                           ageGroup = "adults")); g1prime
-g2 <- plotFformat(plotFQP(studyNum = "2", 
-                          countryName = "us", 
-                          ageGroup = "children")); g2
-g3 <- plotFformat(plotFQP(studyNum = "3", 
-                          countryName = "india", 
-                          ageGroup = "adults")); g3
-g4us <- plotFformat(plotFQP(studyNum = "4", 
-                          countryName = "us", 
-                          ageGroup = "adults")); g4us
-g4india <- plotFformat(plotFQP(studyNum = "4", 
-                            countryName = "india", 
-                            ageGroup = "adults")); g4india
+g1 <- plotFformat(plotFQP("1", "us", "adults")); g1
+# g1prime <- plotFformat(plotFQP("1prime", "us", "adults")); g1prime
+g2 <- plotFformat(plotFQP("2", "us", "children")); g2
+g3 <- plotFformat(plotFQP("3", "india", "adults")); g3
+g4us <- plotFformat(plotFQP("4", "us", "adults")); g4us
+g4india <- plotFformat(plotFQP("4", "india", "adults")); g4india
 
 # plot 2-way comparisons of all possible fact-quesiton pairings
 g12 <- plotFformat(plotFcompAge(studyNum = c("1", "2"))); g12
 g2re <- plotFformat(plotFcompRE(studyNum = c("2", "2"))); g2re
 g13 <- plotFformat(plotFcompCountry(studyNum = c("1", "3"))); g13
 g4all <- plotFformat(plotFcompCountry(studyNum = c("4", "4"))); g4all
+
