@@ -196,6 +196,8 @@ plotQPCompFraming <- function(studyNum, scoreType) {
 
 # make plot-formatting function
 plotQPFormat <- function(plot, scoreType) {
+  
+  # set parameters of study
   studyNum <- levels(factor(plot$data$study))
   countryName <- levels(factor(plot$data$country))
   ageGroup <- levels(factor(plot$data$ageGroup))
@@ -209,6 +211,8 @@ plotQPFormat <- function(plot, scoreType) {
   } else if (scoreType == "abs") {
     ylim = c(0, 1.5)
   }
+  
+  # plot
   g <- plot +
         coord_cartesian(ylim = ylim) +
         theme_bw() +
@@ -225,9 +229,16 @@ plotQPFormat <- function(plot, scoreType) {
              y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)") +
       scale_x_discrete(labels = c("Affect", "Autonomy", 
                                   "Perception", "Inanimate\nMaterial")) +
-      scale_fill_grey(name = "Question Category", 
+#     scale_fill_grey(name = "Question Category", 
+#                     labels = c(" Affect ", " Autonomy ", 
+#                                " Perception ", " Inanimate Material "))
+#   
+    scale_fill_manual(name = "Question Category", 
                       labels = c(" Affect ", " Autonomy ", 
-                                   " Perception ", " Inanimate Material "))
+                                   " Perception ", " Inanimate Material "),
+                      values = c("darkblue", "mediumblue", "lightblue", "red")) 
+
+  # provide study numbers in title
   if (length(studyNum) == 1) {
     if (length(countryName) == 1 & length(ageGroup) == 1 & 
           length(raceEthn2) < 2) {
@@ -385,6 +396,8 @@ plotSentCompFraming <- function(studyNum, scoreType) {
 
 # make plot-formatting function
 plotSentFormat <- function(plot, scoreType) {
+  
+  # set parameters of study
   studyNum <- levels(factor(plot$data$study))
   countryName <- levels(factor(plot$data$country))
   ageGroup <- levels(factor(plot$data$ageGroup))
@@ -398,6 +411,8 @@ plotSentFormat <- function(plot, scoreType) {
   } else if (scoreType == "abs") {
     ylim = c(0, 1.5)
   }
+  
+  # plot
   g <- plot +
     coord_cartesian(ylim = ylim) +
     theme_bw() +
@@ -413,6 +428,8 @@ plotSentFormat <- function(plot, scoreType) {
     labs(x = "Trial Type", 
          y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
     scale_x_discrete(labels = c("Inanimate", "Sentient-Only")) 
+  
+  # provide study numbers in title
   if (length(studyNum) == 1) {
     if (length(countryName) == 1 & length(ageGroup) == 1 & 
           length(raceEthn2) < 2) {
@@ -468,7 +485,9 @@ sumTableQP <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
+         upperB = mean + marginError,
+         sent = ifelse(factCat == "phy" | questionCat == "phy",
+                              "inanimate", "sentient-only")) %>%
   refactor()
 sumTableQP
 
@@ -482,7 +501,9 @@ sumTableQPRE <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
+         upperB = mean + marginError,
+         sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only")) %>%
   refactor()
 sumTableQPRE
 
@@ -499,7 +520,9 @@ sumTableQP_abs <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
+         upperB = mean + marginError,
+         sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only")) %>%
   refactor()
 sumTableQP_abs
 
@@ -514,7 +537,9 @@ sumTableQPRE_abs <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
+         upperB = mean + marginError,
+         sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only")) %>%
   refactor()
 sumTableQPRE_abs
 
