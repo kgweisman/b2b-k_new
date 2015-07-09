@@ -66,12 +66,23 @@ d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv"
 
 # glimpse(d)
 
-# --- PLOTTING FUNCTIONS: ALL POSSIBLE FACT-QUESTION PAIRINGS -----------------
+# --- PLOTTING FUNCTIONS ------------------------------------------------------
+
+# ------ all possible fact-question pairings ----------------------------------
 
 # make plotting function for plotting all possible fact-question pairings
-plotQP <- function(studyNum, countryName, ageGroup) {
+plotQP <- function(studyNum, countryName, ageGroup, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableQP
+  } else if (scoreType == "abs") {
+    table <- sumTableQP_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTableQP, 
+              data = subset(table, 
                             study == studyNum & country == countryName)) +
     geom_bar(aes(fill = questionCat), 
              colour = "black", position = "dodge", stat = "identity") + 
@@ -82,9 +93,18 @@ plotQP <- function(studyNum, countryName, ageGroup) {
 }
 
 # make plotting function comparing fact-question pairings across age groups
-plotQPCompAge <- function(studyNum) {
+plotQPCompAge <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableQP
+  } else if (scoreType == "abs") {
+    table <- sumTableQP_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTableQP, 
+              data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(ageGroup ~ .,
                labeller = labeller(ageGroup = c("adults" = "US Adults", 
@@ -98,9 +118,18 @@ plotQPCompAge <- function(studyNum) {
 }
 
 # make plotting function comparing fact-question pairings across race/ethnicity
-plotQPCompRE <- function(studyNum) {
+plotQPCompRE <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableQPRE
+  } else if (scoreType == "abs") {
+    table <- sumTableQPRE_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTableQPRE, 
+              data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(raceEthn2 ~ .,
                labeller = labeller(raceEthn2 = c("of-color" = "Children of Color", 
@@ -114,9 +143,18 @@ plotQPCompRE <- function(studyNum) {
 }
 
 # make plotting function comparing fact-question pairings across countries
-plotQPCompCountry <- function(studyNum) {
+plotQPCompCountry <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableQP
+  } else if (scoreType == "abs") {
+    table <- sumTableQP_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTableQP, 
+              data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(country ~ .,
                labeller = labeller(country = c("india" = "Indian Adults", 
@@ -130,9 +168,18 @@ plotQPCompCountry <- function(studyNum) {
 }
 
 # make plotting function comparing fact-question pairings across countries
-plotQPCompFraming <- function(studyNum) {
+plotQPCompFraming <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableQP
+  } else if (scoreType == "abs") {
+    table <- sumTableQP_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTableQP, study == studyNum[1] | 
+              data = subset(table, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
     facet_grid(country ~ framing,
                labeller = labeller(
@@ -148,7 +195,7 @@ plotQPCompFraming <- function(studyNum) {
 }
 
 # make plot-formatting function
-plotQPFormat <- function(plot) {
+plotQPFormat <- function(plot, scoreType) {
   studyNum <- levels(factor(plot$data$study))
   countryName <- levels(factor(plot$data$country))
   ageGroup <- levels(factor(plot$data$ageGroup))
@@ -157,8 +204,13 @@ plotQPFormat <- function(plot) {
   } else {
     raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
   }
+  if (scoreType == "raw") {
+    ylim = c(-1.5, 1.5)
+  } else if (scoreType == "abs") {
+    ylim = c(0, 1.5)
+  }
   g <- plot +
-        coord_cartesian(ylim = c(-1.5, 1.5)) +
+        coord_cartesian(ylim = ylim) +
         theme_bw() +
         theme(text = element_text(size = 20),
               axis.text = element_text(size = 15),
@@ -170,7 +222,7 @@ plotQPFormat <- function(plot) {
               plot.title = element_text(size = 20),
               strip.text = element_text(size = 20)) +
         labs(x = "Fact Category", 
-             y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
+             y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)") +
       scale_x_discrete(labels = c("Affect", "Autonomy", 
                                   "Perception", "Inanimate\nMaterial")) +
       scale_fill_grey(name = "Question Category", 
@@ -205,12 +257,21 @@ plotQPFormat <- function(plot) {
   return(g)
 }
 
-# --- PLOTTING FUNCTIONS: SENTIENT-ONLY VS. INANIMATE TRIALS ------------------
+# ------ sentient only vs. inanimate trials -----------------------------------
 
 # make plotting function for plotting trial types
-plotSent <- function(studyNum, countryName, ageGroup) {
+plotSent <- function(studyNum, countryName, ageGroup, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableSent
+  } else if (scoreType == "abs") {
+    table <- sumTableSent_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = sent, y = mean),
-              data = subset(sumTableSent,
+              data = subset(table,
                             study == studyNum & country == countryName)) +
     geom_bar(fill = "gray", colour = "black", 
              position = "dodge", stat = "identity") +
@@ -221,9 +282,18 @@ plotSent <- function(studyNum, countryName, ageGroup) {
 }
 
 # make plotting function comparing trial types across age groups
-plotSentCompAge <- function(studyNum) {
+plotSentCompAge <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableSent
+  } else if (scoreType == "abs") {
+    table <- sumTableSent_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = sent, y = mean), 
-              data = subset(sumTableSent, 
+              data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(ageGroup ~ .,
                labeller = labeller(ageGroup = c("adults" = "US Adults", 
@@ -237,9 +307,18 @@ plotSentCompAge <- function(studyNum) {
 }
 
 # make plotting function comparing trial types across race/ethnicity
-plotSentCompRE <- function(studyNum) {
+plotSentCompRE <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableSentRE
+  } else if (scoreType == "abs") {
+    table <- sumTableSentRE_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = sent, y = mean), 
-              data = subset(sumTableSentRE, 
+              data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(raceEthn2 ~ .,
                labeller = labeller(raceEthn2 = c("of-color" = "Children of Color", 
@@ -253,9 +332,18 @@ plotSentCompRE <- function(studyNum) {
 }
 
 # make plotting function comparing trial types across countries
-plotSentCompCountry <- function(studyNum) {
+plotSentCompCountry <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableSent
+  } else if (scoreType == "abs") {
+    table <- sumTableSent_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = sent, y = mean), 
-              data = subset(sumTableSent, 
+              data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(country ~ .,
                labeller = labeller(country = c("india" = "Indian Adults", 
@@ -269,9 +357,18 @@ plotSentCompCountry <- function(studyNum) {
 }
 
 # make plotting function comparing trial types across countries
-plotSentCompFraming <- function(studyNum) {
+plotSentCompFraming <- function(studyNum, scoreType) {
+  
+  # select which table to use
+  if (scoreType == "raw") {
+    table <- sumTableSent
+  } else if (scoreType == "abs") {
+    table <- sumTableSent_abs
+  }
+  
+  # plot means
   g <- ggplot(aes(x = sent, y = mean), 
-              data = subset(sumTableSent, study == studyNum[1] | 
+              data = subset(table, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
     facet_grid(country ~ framing,
                labeller = labeller(
@@ -287,7 +384,7 @@ plotSentCompFraming <- function(studyNum) {
 }
 
 # make plot-formatting function
-plotSentFormat <- function(plot) {
+plotSentFormat <- function(plot, scoreType) {
   studyNum <- levels(factor(plot$data$study))
   countryName <- levels(factor(plot$data$country))
   ageGroup <- levels(factor(plot$data$ageGroup))
@@ -296,8 +393,13 @@ plotSentFormat <- function(plot) {
   } else {
     raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
   }
+  if (scoreType == "raw") {
+    ylim = c(-1.5, 1.5)
+  } else if (scoreType == "abs") {
+    ylim = c(0, 1.5)
+  }
   g <- plot +
-    coord_cartesian(ylim = c(-1.5, 1.5)) +
+    coord_cartesian(ylim = ylim) +
     theme_bw() +
     theme(text = element_text(size = 20),
           axis.text = element_text(size = 15),
@@ -318,12 +420,12 @@ plotSentFormat <- function(plot) {
         labs(title = paste0("Inferences by Trial Type:\nStudy ",
                             studyNum, " (",
                             ifelse(countryName == "us", "US ", "Indian "),
-                            str_to_title(ageGroup), ")"))
+                            str_to_title(ageGroup), ")\n"))
       
     } else {
       g <- g + 
         labs(title = paste0("Inferences by Trial Type: Study ",
-                            studyNum))    
+                            studyNum, "\n"))    
     }
   } else {
     # make string of study labels
@@ -335,14 +437,14 @@ plotSentFormat <- function(plot) {
     studies <- substring(studies, first = 3)
     g <- g + 
       labs(title = paste0("Inferences by Trial Type: Studies ",
-                          studies))
+                          studies, "\n"))
   }
   return(g)
 }
 
-# --- SUMMARY TABLES BY FACT-QUESTION PAIR ------------------------------------
+# --- SUMMARY TABLES ----------------------------------------------------------
 
-# make refactoring function to reorder levels
+# make refactoring function to reo, scoreTyperder levels
 refactor <- function(table) {
   table$ageGroup = factor(table$ageGroup, levels = c("adults", "children"))
   table$country = factor(table$country, levels = c("us", "india"))
@@ -353,6 +455,8 @@ refactor <- function(table) {
   }
   return(table)
 }
+
+# ------ all possible fact-question pairings: RAW SCORES ----------------------
 
 # make summary table by fact-question pair (collapse across race/ethncity)
 sumTableQP <- d %>%
@@ -381,6 +485,40 @@ sumTableQPRE <- d %>%
          upperB = mean + marginError) %>%
   refactor()
 sumTableQPRE
+
+# ------ all possible fact-question pairings: ABSOLUTE VALUES OF SCORES -------
+
+# make summary table by fact-question pair (collapse across race/ethncity)
+sumTableQP_abs <- d %>%
+  filter(study != "1prime" & phase == "test") %>%
+  mutate(response_abs = abs(response)) %>%
+  group_by(study, ageGroup, country, framing, factCat, questionCat) %>%
+  summarise(mean = mean(response_abs, na.rm = T),
+            sd = sd(response_abs, na.rm = T),
+            n = length(response_abs[is.na(response_abs) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError) %>%
+  refactor()
+sumTableQP_abs
+
+# make summary table by fact-question pair (separate by race/ethncity)
+sumTableQPRE_abs <- d %>%
+  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
+  mutate(response_abs = abs(response)) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, factCat, questionCat) %>%
+  summarise(mean = mean(response_abs, na.rm = T),
+            sd = sd(response_abs, na.rm = T),
+            n = length(response_abs[is.na(response_abs) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError) %>%
+  refactor()
+sumTableQPRE_abs
+
+# ------ sentient-only vs. inanimate trials: RAW SCORES -----------------------
 
 # make summary table by sentient-only vs. inanimate trials (collapse across race/ethncity)
 sumTableSent <- d %>%
@@ -414,39 +552,116 @@ sumTableSentRE <- d %>%
   refactor()
 sumTableSentRE
 
-# ------ PLOTS ----------------------------------------------------------------
+# ------ sentient-only vs. inanimate trials: ABSOLUTE VALUES OF SCORES --------
+
+# make summary table by sentient-only vs. inanimate trials (collapse across race/ethncity)
+sumTableSent_abs <- d %>%
+  filter(study != "1prime" & phase == "test") %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only"),
+         response_abs = abs(response)) %>%
+  group_by(study, ageGroup, country, framing, sent) %>%
+  summarise(mean = mean(response_abs, na.rm = T),
+            sd = sd(response_abs, na.rm = T),
+            n = length(response_abs[is.na(response_abs) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError) %>%
+  refactor()
+sumTableSent_abs
+
+# make summary table by fact-question pair (separate by race/ethncity)
+sumTableSentRE_abs <- d %>%
+  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only"),
+         response_abs = abs(response)) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
+  summarise(mean = mean(response_abs, na.rm = T),
+            sd = sd(response_abs, na.rm = T),
+            n = length(response_abs[is.na(response_abs) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError) %>%
+  refactor()
+sumTableSentRE_abs
+
+# --- PLOTS -------------------------------------------------------------------
+
+# ------ all possible fact-question pairings: RAW SCORES ----------------------
 
 # plot all possible fact-question pairings, by individual study
-g1 <- plotQPFormat(plotQP("1", "us", "adults")); g1
-# g1prime <- plotQPFormat(plotQP("1prime", "us", "adults")); g1prime
-g2 <- plotQPFormat(plotQP("2", "us", "children")); g2
-g3 <- plotQPFormat(plotQP("3", "india", "adults")); g3
-g4us <- plotQPFormat(plotQP("4", "us", "adults")); g4us
-g4india <- plotQPFormat(plotQP("4", "india", "adults")); g4india
+g1 <- plotQPFormat(plotQP("1", "us", "adults", "raw"), "raw"); g1
+# g1prime <- plotQPFormat(plotQP("1prime", "us", "adults", "raw"), "raw"); g1prime
+g2 <- plotQPFormat(plotQP("2", "us", "children", "raw"), "raw"); g2
+g3 <- plotQPFormat(plotQP("3", "india", "adults", "raw"), "raw"); g3
+g4us <- plotQPFormat(plotQP("4", "us", "adults", "raw"), "raw"); g4us
+g4india <- plotQPFormat(plotQP("4", "india", "adults", "raw"), "raw"); g4india
 
 # plot 2-way comparisons of all possible fact-quesiton pairings
-g12 <- plotQPFormat(plotQPCompAge(studyNum = c("1", "2"))); g12
-g2re <- plotQPFormat(plotQPCompRE(studyNum = c("2", "2"))); g2re
-g13 <- plotQPFormat(plotQPCompCountry(studyNum = c("1", "3"))); g13
-g4all <- plotQPFormat(plotQPCompCountry(studyNum = c("4", "4"))); g4all
+g12 <- plotQPFormat(plotQPCompAge(c("1", "2"), "raw"), "raw"); g12
+g2re <- plotQPFormat(plotQPCompRE(c("2", "2"), "raw"), "raw"); g2re
+g13 <- plotQPFormat(plotQPCompCountry(c("1", "3"), "raw"), "raw"); g13
+g4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw"); g4all
 
 # plot 4-way comparison of framing by country (adults)
-g134 <- plotQPFormat(plotQPCompFraming(studyNum = c("1", "3", "4"))); g134
+g134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw"); g134
+
+# ------ all possible fact-question pairings: ABSOLUTE VALUES OF SCORES -------
+
+# plot all possible fact-question pairings, by individual study
+g1_abs <- plotQPFormat(plotQP("1", "us", "adults", "abs"), "abs"); g1_abs
+# g1prime_abs <- plotQPFormat(plotQP("1prime", "us", "adults", "abs"), "abs"); g1prime_abs
+g2_abs <- plotQPFormat(plotQP("2", "us", "children", "abs"), "abs"); g2_abs
+g3_abs <- plotQPFormat(plotQP("3", "india", "adults", "abs"), "abs"); g3_abs
+g4us_abs <- plotQPFormat(plotQP("4", "us", "adults", "abs"), "abs"); g4us_abs
+g4india_abs <- plotQPFormat(plotQP("4", "india", "adults", "abs"), "abs"); g4india_abs
+
+# plot 2-way comparisons of all possible fact-quesiton pairings
+g12_abs <- plotQPFormat(plotQPCompAge(c("1", "2"), "abs"), "abs"); g12_abs
+g2re_abs <- plotQPFormat(plotQPCompRE(c("2", "2"), "abs"), "abs"); g2re_abs
+g13_abs <- plotQPFormat(plotQPCompCountry(c("1", "3"), "abs"), "abs"); g13_abs
+g4all_abs <- plotQPFormat(plotQPCompCountry(c("4", "4"), "abs"), "abs"); g4all_abs
+
+# plot 4-way comparison of framing by country (adults)
+g134_abs <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "abs"), "abs"); g134_abs
+
+# ------ sentient-only vs. inanimate trials: RAW SCORES -----------------------
 
 # plot sentient vs. inanimate, by individual study
-p1 <- plotSentFormat(plotSent("1", "us", "adults")); p1
-# p1prime <- plotSentFormat(plotSent("1prime", "us", "adults")); p1prime
-p2 <- plotSentFormat(plotSent("2", "us", "children")); p2
-p3 <- plotSentFormat(plotSent("3", "india", "adults")); p3
-p4us <- plotSentFormat(plotSent("4", "us", "adults")); p4us
-p4india <- plotSentFormat(plotSent("4", "india", "adults")); p4india
+p1 <- plotSentFormat(plotSent("1", "us", "adults", "raw"), "raw"); p1
+# p1prime <- plotSentFormat(plotSent("1prime", "us", "adults", "raw"), "raw"); p1prime
+p2 <- plotSentFormat(plotSent("2", "us", "children", "raw"), "raw"); p2
+p3 <- plotSentFormat(plotSent("3", "india", "adults", "raw"), "raw"); p3
+p4us <- plotSentFormat(plotSent("4", "us", "adults", "raw"), "raw"); p4us
+p4india <- plotSentFormat(plotSent("4", "india", "adults", "raw"), "raw"); p4india
 
 # plot 2-way comparisons of all possible fact-quesiton pairings
-p12 <- plotSentFormat(plotSentCompAge(studyNum = c("1", "2"))); p12
-p2re <- plotSentFormat(plotSentCompRE(studyNum = c("2", "2"))); p2re
-p13 <- plotSentFormat(plotSentCompCountry(studyNum = c("1", "3"))); p13
-p4all <- plotSentFormat(plotSentCompCountry(studyNum = c("4", "4"))); p4all
+p12 <- plotSentFormat(plotSentCompAge(c("1", "2"), "raw"), "raw"); p12
+p2re <- plotSentFormat(plotSentCompRE(c("2", "2"), "raw"), "raw"); p2re
+p13 <- plotSentFormat(plotSentCompCountry(c("1", "3"), "raw"), "raw"); p13
+p4all <- plotSentFormat(plotSentCompCountry(c("4", "4"), "raw"), "raw"); p4all
 
 # plot 4-way comparison of framing by country (adults)
-p134 <- plotSentFormat(plotSentCompFraming(studyNum = c("1", "3", "4"))); p134
+p134 <- plotSentFormat(plotSentCompFraming(c("1", "3", "4"), "raw"), "raw"); p134
 
+# ------ sentient-only vs. inanimate trials: ABSOLUTE VALUES OF SCORES --------
+
+# plot sentient vs. inanimate, by individual study
+p1_abs <- plotSentFormat(plotSent("1", "us", "adults", "abs"), "abs"); p1_abs
+# p1prime_abs <- plotSentFormat(plotSent("1prime", "us", "adults", "abs"), "abs"); p1prime_abs
+p2_abs <- plotSentFormat(plotSent("2", "us", "children", "abs"), "abs"); p2_abs
+p3_abs <- plotSentFormat(plotSent("3", "india", "adults", "abs"), "abs"); p3_abs
+p4us_abs <- plotSentFormat(plotSent("4", "us", "adults", "abs"), "abs"); p4us_abs
+p4india_abs <- plotSentFormat(plotSent("4", "india", "adults", "abs"), "abs"); p4india_abs
+
+# plot 2-way comparisons of all possible fact-quesiton pairings
+p12_abs <- plotSentFormat(plotSentCompAge(c("1", "2"), "abs"), "abs"); p12_abs
+p2re_abs <- plotSentFormat(plotSentCompRE(c("2", "2"), "abs"), "abs"); p2re_abs
+p13_abs <- plotSentFormat(plotSentCompCountry(c("1", "3"), "abs"), "abs"); p13_abs
+p4all_abs <- plotSentFormat(plotSentCompCountry(c("4", "4"), "abs"), "abs"); p4all_abs
+
+# plot 4-way comparison of framing by country (adults)
+p134_abs <- plotSentFormat(plotSentCompFraming(c("1", "3", "4"), "abs"), "abs"); p134_abs
