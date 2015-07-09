@@ -66,12 +66,12 @@ d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv"
 
 # glimpse(d)
 
-# --- PLOTTING FUNCTIONS ------------------------------------------------------
+# --- PLOTTING FUNCTIONS: ALL POSSIBLE FACT-QUESTION PAIRINGS -----------------
 
 # make plotting function for plotting all possible fact-question pairings
-plotFQP <- function(studyNum, countryName, ageGroup) {
+plotQP <- function(studyNum, countryName, ageGroup) {
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTable, 
+              data = subset(sumTableQP, 
                             study == studyNum & country == countryName)) +
     geom_bar(aes(fill = questionCat), 
              colour = "black", position = "dodge", stat = "identity") + 
@@ -82,10 +82,10 @@ plotFQP <- function(studyNum, countryName, ageGroup) {
 }
 
 # make plotting function comparing fact-question pairings across age groups
-plotFcompAge <- function(studyNum) {
-  levels(sumTable$ageGroup) = c("children", "adults")
+plotQPCompAge <- function(studyNum) {
+  levels(sumTableQP$ageGroup) = c("children", "adults")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTable, 
+              data = subset(sumTableQP, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(ageGroup ~ .,
                labeller = labeller(ageGroup = c("adults" = "US Adults", 
@@ -99,10 +99,10 @@ plotFcompAge <- function(studyNum) {
 }
 
 # make plotting function comparing fact-question pairings across race/ethnicity
-plotFcompRE <- function(studyNum) {
-  levels(sumTableRE$ageGroup) = c("of-color", "white")
+plotQPCompRE <- function(studyNum) {
+  levels(sumTableQPRE$ageGroup) = c("of-color", "white")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTableRE, 
+              data = subset(sumTableQPRE, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(raceEthn2 ~ .,
                labeller = labeller(raceEthn2 = c("of-color" = "Children of Color", 
@@ -116,10 +116,10 @@ plotFcompRE <- function(studyNum) {
 }
 
 # make plotting function comparing fact-question pairings across countries
-plotFcompCountry <- function(studyNum) {
-  levels(sumTable$country) = c("india", "us")
+plotQPCompCountry <- function(studyNum) {
+  levels(sumTableQP$country) = c("india", "us")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTable, 
+              data = subset(sumTableQP, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(country ~ .,
                labeller = labeller(country = c("india" = "Indian Adults", 
@@ -133,11 +133,11 @@ plotFcompCountry <- function(studyNum) {
 }
 
 # make plotting function comparing fact-question pairings across countries
-plotFcompFraming <- function(studyNum) {
-  levels(sumTable$country) = c("india", "us")
-  levels(sumTable$framing) = c("does that mean...?", "do you think...?")
+plotQPCompFraming <- function(studyNum) {
+  levels(sumTableQP$country) = c("india", "us")
+  levels(sumTableQP$framing) = c("does that mean...?", "do you think...?")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
-              data = subset(sumTable, study == studyNum[1] | 
+              data = subset(sumTableQP, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
     facet_grid(country ~ framing,
                labeller = labeller(
@@ -153,7 +153,7 @@ plotFcompFraming <- function(studyNum) {
 }
 
 # make plot-formatting function
-plotFformat <- function(plot) {
+plotQPFormat <- function(plot) {
   studyNum <- levels(factor(plot$data$study))
   countryName <- levels(factor(plot$data$country))
   ageGroup <- levels(factor(plot$data$ageGroup))
@@ -201,7 +201,7 @@ plotFformat <- function(plot) {
     for(i in 1:(length(studyNum) - 1)) {
       studies <- paste(studies, studyNum[i], sep = ", ")
     }
-    studies <- paste(studies, studyNum[length(studyNum)], sep = ", & ")
+    studies <- paste(studies, studyNum[length(studyNum)], sep = " & ")
     studies <- substring(studies, first = 3)
     g <- g + 
       labs(title = paste0("Inferences by Fact and Question Category: Studies ",
@@ -210,10 +210,150 @@ plotFformat <- function(plot) {
   return(g)
 }
 
+# --- PLOTTING FUNCTIONS: SENTIENT-ONLY VS. INANIMATE TRIALS ------------------
+
+# make plotting function for plotting trial types
+plotSent <- function(studyNum, countryName, ageGroup) {
+  g <- ggplot(aes(x = sent, y = mean),
+              data = subset(sumTableSent,
+                            study == studyNum & country == countryName)) +
+    geom_bar(fill = "gray", colour = "black", 
+             position = "dodge", stat = "identity") +
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plotting function comparing trial types across age groups
+plotSentCompAge <- function(studyNum) {
+  levels(sumTableSent$ageGroup) = c("children", "adults")
+  g <- ggplot(aes(x = sent, y = mean), 
+              data = subset(sumTableSent, 
+                            study == studyNum[1] | study == studyNum[2])) +
+    facet_grid(ageGroup ~ .,
+               labeller = labeller(ageGroup = c("adults" = "US Adults", 
+                                                "children" = "US Children"))) +
+    geom_bar(fill = "gray", colour = "black", 
+             position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plotting function comparing trial types across race/ethnicity
+plotSentCompRE <- function(studyNum) {
+  levels(sumTableSentRE$raceEthn2) = c("of-color", "white")
+  g <- ggplot(aes(x = sent, y = mean), 
+              data = subset(sumTableSentRE, 
+                            study == studyNum[1] | study == studyNum[2])) +
+    facet_grid(raceEthn2 ~ .,
+               labeller = labeller(raceEthn2 = c("of-color" = "Children of Color", 
+                                                 "white" = "White Children"))) +
+    geom_bar(fill = "gray", colour = "black", 
+             position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plotting function comparing trial types across countries
+plotSentCompCountry <- function(studyNum) {
+  levels(sumTableSent$country) = c("india", "us")
+  g <- ggplot(aes(x = sent, y = mean), 
+              data = subset(sumTableSent, 
+                            study == studyNum[1] | study == studyNum[2])) +
+    facet_grid(country ~ .,
+               labeller = labeller(country = c("india" = "Indian Adults", 
+                                               "us" = "US Adults"))) +
+    geom_bar(fill = "gray", colour = "black", 
+             position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plotting function comparing trial types across countries
+plotSentCompFraming <- function(studyNum) {
+  levels(sumTableSent$country) = c("india", "us")
+  levels(sumTableSent$framing) = c("does that mean...?", "do you think...?")
+  g <- ggplot(aes(x = sent, y = mean), 
+              data = subset(sumTableSent, study == studyNum[1] | 
+                              study == studyNum[2] | study == studyNum[3])) +
+    facet_grid(country ~ framing,
+               labeller = labeller(
+                 country = c("india" = "Indian Adults", "us" = "US Adults"),
+                 framing = c("do you think...?" = "Do you think...?",
+                             "does that mean...?" = "Does that mean...?"))) +
+    geom_bar(fill = "gray", colour = "black", 
+             position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
+# make plot-formatting function
+plotSentFormat <- function(plot) {
+  studyNum <- levels(factor(plot$data$study))
+  countryName <- levels(factor(plot$data$country))
+  ageGroup <- levels(factor(plot$data$ageGroup))
+  if (is.null(plot$data$raceEthn2)) {
+    raceEthn2 <- "NA"
+  } else {
+    raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
+  }
+  g <- plot +
+    coord_cartesian(ylim = c(-1.5, 1.5)) +
+    theme_bw() +
+    theme(text = element_text(size = 20),
+          axis.text = element_text(size = 15),
+          axis.title = element_text(size = 20),
+          axis.text.x = element_text(size = 20),
+          legend.position = "top",
+          legend.text = element_text(size = 15),
+          legend.title = element_text(size = 15),
+          plot.title = element_text(size = 20),
+          strip.text = element_text(size = 20)) +
+    labs(x = "Trial Type", 
+         y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
+    scale_x_discrete(labels = c("Inanimate", "Sentient-Only")) 
+  if (length(studyNum) == 1) {
+    if (length(countryName) == 1 & length(ageGroup) == 1 & 
+          length(raceEthn2) < 2) {
+      g <- g + 
+        labs(title = paste0("Inferences by Trial Type:\nStudy ",
+                            studyNum, " (",
+                            ifelse(countryName == "us", "US ", "Indian "),
+                            str_to_title(ageGroup), ")"))
+      
+    } else {
+      g <- g + 
+        labs(title = paste0("Inferences by Trial Type: Study ",
+                            studyNum))    
+    }
+  } else {
+    # make string of study labels
+    studies <- NULL
+    for(i in 1:(length(studyNum) - 1)) {
+      studies <- paste(studies, studyNum[i], sep = ", ")
+    }
+    studies <- paste(studies, studyNum[length(studyNum)], sep = " & ")
+    studies <- substring(studies, first = 3)
+    g <- g + 
+      labs(title = paste0("Inferences by Trial Type: Studies ",
+                          studies))
+  }
+  return(g)
+}
+
 # --- SUMMARY TABLES BY FACT-QUESTION PAIR ------------------------------------
 
-# make summary table (collapse across race/ethncity)
-sumTable <- d %>%
+# make summary table by fact-question pair (collapse across race/ethncity)
+sumTableQP <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   group_by(study, ageGroup, country, framing, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
@@ -223,10 +363,10 @@ sumTable <- d %>%
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
          upperB = mean + marginError)
-sumTable
+sumTableQP
 
-# make summary table (separate by race/ethncity)
-sumTableRE <- d %>%
+# make summary table by fact-question pair (separate by race/ethncity)
+sumTableQPRE <- d %>%
   filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
   group_by(study, ageGroup, country, raceEthn2, framing, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
@@ -236,23 +376,71 @@ sumTableRE <- d %>%
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
          upperB = mean + marginError)
-sumTableRE
+sumTableQPRE
+
+# make summary table by sentient-only vs. inanimate trials (collapse across race/ethncity)
+sumTableSent <- d %>%
+  filter(study != "1prime" & phase == "test") %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+         "inanimate", "sentient-only")) %>%
+  group_by(study, ageGroup, country, framing, sent) %>%
+  summarise(mean = mean(response, na.rm = T),
+            sd = sd(response, na.rm = T),
+            n = length(response[is.na(response) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError)
+sumTableSent
+
+# make summary table by fact-question pair (separate by race/ethncity)
+sumTableSentRE <- d %>%
+  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only")) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
+  summarise(mean = mean(response, na.rm = T),
+            sd = sd(response, na.rm = T),
+            n = length(response[is.na(response) == F])) %>%
+  mutate(se = sd/sqrt(n),
+         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
+         lowerB = mean - marginError,
+         upperB = mean + marginError)
+sumTableSentRE
 
 # ------ PLOTS ----------------------------------------------------------------
 
 # plot all possible fact-question pairings, by individual study
-g1 <- plotFformat(plotFQP("1", "us", "adults")); g1
-# g1prime <- plotFformat(plotFQP("1prime", "us", "adults")); g1prime
-g2 <- plotFformat(plotFQP("2", "us", "children")); g2
-g3 <- plotFformat(plotFQP("3", "india", "adults")); g3
-g4us <- plotFformat(plotFQP("4", "us", "adults")); g4us
-g4india <- plotFformat(plotFQP("4", "india", "adults")); g4india
+g1 <- plotQPFormat(plotQP("1", "us", "adults")); g1
+# g1prime <- plotQPFormat(plotQP("1prime", "us", "adults")); g1prime
+g2 <- plotQPFormat(plotQP("2", "us", "children")); g2
+g3 <- plotQPFormat(plotQP("3", "india", "adults")); g3
+g4us <- plotQPFormat(plotQP("4", "us", "adults")); g4us
+g4india <- plotQPFormat(plotQP("4", "india", "adults")); g4india
 
 # plot 2-way comparisons of all possible fact-quesiton pairings
-g12 <- plotFformat(plotFcompAge(studyNum = c("1", "2"))); g12
-g2re <- plotFformat(plotFcompRE(studyNum = c("2", "2"))); g2re
-g13 <- plotFformat(plotFcompCountry(studyNum = c("1", "3"))); g13
-g4all <- plotFformat(plotFcompCountry(studyNum = c("4", "4"))); g4all
+g12 <- plotQPFormat(plotQPCompAge(studyNum = c("1", "2"))); g12
+g2re <- plotQPFormat(plotQPCompRE(studyNum = c("2", "2"))); g2re
+g13 <- plotQPFormat(plotQPCompCountry(studyNum = c("1", "3"))); g13
+g4all <- plotQPFormat(plotQPCompCountry(studyNum = c("4", "4"))); g4all
 
 # plot 4-way comparison of framing by country (adults)
-g134 <- plotFformat(plotFcompFraming(studyNum = c("1", "3", "4"))); g134
+g134 <- plotQPFormat(plotQPCompFraming(studyNum = c("1", "3", "4"))); g134
+
+# plot sentient vs. inanimate, by individual study
+p1 <- plotSentFormat(plotSent("1", "us", "adults")); p1
+# p1prime <- plotSentFormat(plotSent("1prime", "us", "adults")); p1prime
+p2 <- plotSentFormat(plotSent("2", "us", "children")); p2
+p3 <- plotSentFormat(plotSent("3", "india", "adults")); p3
+p4us <- plotSentFormat(plotSent("4", "us", "adults")); p4us
+p4india <- plotSentFormat(plotSent("4", "india", "adults")); p4india
+
+# plot 2-way comparisons of all possible fact-quesiton pairings
+p12 <- plotSentFormat(plotSentCompAge(studyNum = c("1", "2"))); p12
+p2re <- plotSentFormat(plotSentCompRE(studyNum = c("2", "2"))); p2re
+p13 <- plotSentFormat(plotSentCompCountry(studyNum = c("1", "3"))); p13
+p4all <- plotSentFormat(plotSentCompCountry(studyNum = c("4", "4"))); p4all
+
+# plot 4-way comparison of framing by country (adults)
+p134 <- plotSentFormat(plotSentCompFraming(studyNum = c("1", "3", "4"))); p134
+
