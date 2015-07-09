@@ -83,7 +83,6 @@ plotQP <- function(studyNum, countryName, ageGroup) {
 
 # make plotting function comparing fact-question pairings across age groups
 plotQPCompAge <- function(studyNum) {
-  levels(sumTableQP$ageGroup) = c("children", "adults")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(sumTableQP, 
                             study == studyNum[1] | study == studyNum[2])) +
@@ -100,7 +99,6 @@ plotQPCompAge <- function(studyNum) {
 
 # make plotting function comparing fact-question pairings across race/ethnicity
 plotQPCompRE <- function(studyNum) {
-  levels(sumTableQPRE$raceEthn2) = c("of-color", "white")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(sumTableQPRE, 
                             study == studyNum[1] | study == studyNum[2])) +
@@ -117,7 +115,6 @@ plotQPCompRE <- function(studyNum) {
 
 # make plotting function comparing fact-question pairings across countries
 plotQPCompCountry <- function(studyNum) {
-  levels(sumTableQP$country) = c("india", "us")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(sumTableQP, 
                             study == studyNum[1] | study == studyNum[2])) +
@@ -134,8 +131,6 @@ plotQPCompCountry <- function(studyNum) {
 
 # make plotting function comparing fact-question pairings across countries
 plotQPCompFraming <- function(studyNum) {
-  levels(sumTableQP$country) = c("india", "us")
-  levels(sumTableQP$framing) = c("does that mean...?", "do you think...?")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(sumTableQP, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
@@ -227,7 +222,6 @@ plotSent <- function(studyNum, countryName, ageGroup) {
 
 # make plotting function comparing trial types across age groups
 plotSentCompAge <- function(studyNum) {
-  levels(sumTableSent$ageGroup) = c("children", "adults")
   g <- ggplot(aes(x = sent, y = mean), 
               data = subset(sumTableSent, 
                             study == studyNum[1] | study == studyNum[2])) +
@@ -244,7 +238,6 @@ plotSentCompAge <- function(studyNum) {
 
 # make plotting function comparing trial types across race/ethnicity
 plotSentCompRE <- function(studyNum) {
-  levels(sumTableSentRE$raceEthn2) = c("of-color", "white")
   g <- ggplot(aes(x = sent, y = mean), 
               data = subset(sumTableSentRE, 
                             study == studyNum[1] | study == studyNum[2])) +
@@ -261,7 +254,6 @@ plotSentCompRE <- function(studyNum) {
 
 # make plotting function comparing trial types across countries
 plotSentCompCountry <- function(studyNum) {
-  levels(sumTableSent$country) = c("india", "us")
   g <- ggplot(aes(x = sent, y = mean), 
               data = subset(sumTableSent, 
                             study == studyNum[1] | study == studyNum[2])) +
@@ -278,8 +270,6 @@ plotSentCompCountry <- function(studyNum) {
 
 # make plotting function comparing trial types across countries
 plotSentCompFraming <- function(studyNum) {
-  levels(sumTableSent$country) = c("india", "us")
-  levels(sumTableSent$framing) = c("does that mean...?", "do you think...?")
   g <- ggplot(aes(x = sent, y = mean), 
               data = subset(sumTableSent, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
@@ -352,6 +342,18 @@ plotSentFormat <- function(plot) {
 
 # --- SUMMARY TABLES BY FACT-QUESTION PAIR ------------------------------------
 
+# make refactoring function to reorder levels
+refactor <- function(table) {
+  table$ageGroup = factor(table$ageGroup, levels = c("adults", "children"))
+  table$country = factor(table$country, levels = c("us", "india"))
+  table$framing = factor(table$framing, levels = c("does that mean...?", 
+                                                   "do you think...?"))
+  if (grepl("raceEthn2", paste(names(table), collapse = "_"), fixed = T)) {
+    table$raceEthn2 = factor(table$raceEthn2, levels = c("white", "of-color"))
+  }
+  return(table)
+}
+
 # make summary table by fact-question pair (collapse across race/ethncity)
 sumTableQP <- d %>%
   filter(study != "1prime" & phase == "test") %>%
@@ -362,7 +364,8 @@ sumTableQP <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError)
+         upperB = mean + marginError) %>%
+  refactor()
 sumTableQP
 
 # make summary table by fact-question pair (separate by race/ethncity)
@@ -375,7 +378,8 @@ sumTableQPRE <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError)
+         upperB = mean + marginError) %>%
+  refactor()
 sumTableQPRE
 
 # make summary table by sentient-only vs. inanimate trials (collapse across race/ethncity)
@@ -390,7 +394,8 @@ sumTableSent <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError)
+         upperB = mean + marginError) %>%
+  refactor()
 sumTableSent
 
 # make summary table by fact-question pair (separate by race/ethncity)
@@ -405,7 +410,8 @@ sumTableSentRE <- d %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError)
+         upperB = mean + marginError) %>%
+  refactor()
 sumTableSentRE
 
 # ------ PLOTS ----------------------------------------------------------------
