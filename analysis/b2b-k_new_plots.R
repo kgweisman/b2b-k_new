@@ -100,7 +100,7 @@ plotQPCompAge <- function(studyNum) {
 
 # make plotting function comparing fact-question pairings across race/ethnicity
 plotQPCompRE <- function(studyNum) {
-  levels(sumTableQPRE$ageGroup) = c("of-color", "white")
+  levels(sumTableQPRE$raceEthn2) = c("of-color", "white")
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(sumTableQPRE, 
                             study == studyNum[1] | study == studyNum[2])) +
