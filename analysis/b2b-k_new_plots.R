@@ -84,8 +84,8 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType) {
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(table, 
                             study == studyNum & country == countryName)) +
-    geom_bar(aes(fill = questionCat), 
-             colour = "black", position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black",
+             position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
     geom_hline(yintercept = 0, linetype = 2)
@@ -109,8 +109,8 @@ plotQPCompAge <- function(studyNum, scoreType) {
     facet_grid(ageGroup ~ .,
                labeller = labeller(ageGroup = c("adults" = "US Adults", 
                                                "children" = "US Children"))) +
-    geom_bar(aes(fill = questionCat), 
-             colour = "black", position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black", 
+             position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
     geom_hline(yintercept = 0, linetype = 2)
@@ -134,8 +134,8 @@ plotQPCompRE <- function(studyNum, scoreType) {
     facet_grid(raceEthn2 ~ .,
                labeller = labeller(raceEthn2 = c("of-color" = "Children of Color", 
                                                "white" = "White Children"))) +
-    geom_bar(aes(fill = questionCat), 
-             colour = "black", position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black", 
+             position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
     geom_hline(yintercept = 0, linetype = 2)
@@ -159,8 +159,8 @@ plotQPCompCountry <- function(studyNum, scoreType) {
     facet_grid(country ~ .,
                labeller = labeller(country = c("india" = "Indian Adults", 
                                                "us" = "US Adults"))) +
-    geom_bar(aes(fill = questionCat), 
-             colour = "black", position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black", 
+             position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
     geom_hline(yintercept = 0, linetype = 2)
@@ -186,8 +186,8 @@ plotQPCompFraming <- function(studyNum, scoreType) {
                  country = c("india" = "Indian Adults", "us" = "US Adults"),
                  framing = c("do you think...?" = "Do you think...?",
                              "does that mean...?" = "Does that mean...?"))) +
-    geom_bar(aes(fill = questionCat), 
-             colour = "black", position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black",
+             position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
     geom_hline(yintercept = 0, linetype = 2)
@@ -284,7 +284,7 @@ plotSent <- function(studyNum, countryName, ageGroup, scoreType) {
   g <- ggplot(aes(x = sent, y = mean),
               data = subset(table,
                             study == studyNum & country == countryName)) +
-    geom_bar(fill = "gray", colour = "black", 
+    geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
@@ -309,7 +309,7 @@ plotSentCompAge <- function(studyNum, scoreType) {
     facet_grid(ageGroup ~ .,
                labeller = labeller(ageGroup = c("adults" = "US Adults", 
                                                 "children" = "US Children"))) +
-    geom_bar(fill = "gray", colour = "black", 
+    geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
@@ -332,9 +332,10 @@ plotSentCompRE <- function(studyNum, scoreType) {
               data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(raceEthn2 ~ .,
-               labeller = labeller(raceEthn2 = c("of-color" = "Children of Color", 
+               labeller = labeller(raceEthn2 = c("of-color" = 
+                                                   "Children of Color", 
                                                  "white" = "White Children"))) +
-    geom_bar(fill = "gray", colour = "black", 
+    geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
@@ -359,7 +360,7 @@ plotSentCompCountry <- function(studyNum, scoreType) {
     facet_grid(country ~ .,
                labeller = labeller(country = c("india" = "Indian Adults", 
                                                "us" = "US Adults"))) +
-    geom_bar(fill = "gray", colour = "black", 
+    geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
@@ -386,7 +387,7 @@ plotSentCompFraming <- function(studyNum, scoreType) {
                  country = c("india" = "Indian Adults", "us" = "US Adults"),
                  framing = c("do you think...?" = "Do you think...?",
                              "does that mean...?" = "Does that mean...?"))) +
-    geom_bar(fill = "gray", colour = "black", 
+    geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
@@ -478,32 +479,33 @@ refactor <- function(table) {
 # make summary table by fact-question pair (collapse across race/ethncity)
 sumTableQP <- d %>%
   filter(study != "1prime" & phase == "test") %>%
-  group_by(study, ageGroup, country, framing, factCat, questionCat) %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only")) %>%
+  group_by(study, ageGroup, country, framing, sent, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
             n = length(response[is.na(response) == F])) %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError,
-         sent = ifelse(factCat == "phy" | questionCat == "phy",
-                              "inanimate", "sentient-only")) %>%
+         upperB = mean + marginError) %>%
   refactor()
 sumTableQP
 
 # make summary table by fact-question pair (separate by race/ethncity)
 sumTableQPRE <- d %>%
   filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, factCat, questionCat) %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only")) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, 
+           sent, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
             n = length(response[is.na(response) == F])) %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError,
-         sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+         upperB = mean + marginError) %>%
   refactor()
 sumTableQPRE
 
@@ -512,34 +514,35 @@ sumTableQPRE
 # make summary table by fact-question pair (collapse across race/ethncity)
 sumTableQP_abs <- d %>%
   filter(study != "1prime" & phase == "test") %>%
-  mutate(response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, framing, factCat, questionCat) %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only"),
+         response_abs = abs(response)) %>%
+  group_by(study, ageGroup, country, framing, sent, factCat, questionCat) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
             n = length(response_abs[is.na(response_abs) == F])) %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError,
-         sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+         upperB = mean + marginError) %>%
   refactor()
 sumTableQP_abs
 
 # make summary table by fact-question pair (separate by race/ethncity)
 sumTableQPRE_abs <- d %>%
   filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
-  mutate(response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, factCat, questionCat) %>%
+  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
+                       "inanimate", "sentient-only"),
+         response_abs = abs(response)) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, 
+           sent, factCat, questionCat) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
             n = length(response_abs[is.na(response_abs) == F])) %>%
   mutate(se = sd/sqrt(n),
          marginError = (qt(1 - (.05/2), df = n - 1)) * se,
          lowerB = mean - marginError,
-         upperB = mean + marginError,
-         sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+         upperB = mean + marginError) %>%
   refactor()
 sumTableQPRE_abs
 
@@ -563,7 +566,7 @@ sumTableSent
 
 # make summary table by fact-question pair (separate by race/ethncity)
 sumTableSentRE <- d %>%
-  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
+  filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
                        "inanimate", "sentient-only")) %>%
   group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
