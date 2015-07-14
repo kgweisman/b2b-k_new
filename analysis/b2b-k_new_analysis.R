@@ -325,14 +325,14 @@ summary(r3.orthAbs)
 # us/india comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r3.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
-                          subset(d, (phase == "test" & study == "1") | 
-                                   (phase == "test" & study == "3")))
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
 r3.orthCountryAdd <- lmer(response ~ pair + country + (1 | subid), 
-                         subset(d, (phase == "test" & study == "1") | 
-                                  (phase == "test" & study == "3")))
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
 r3.orthCountryInt <- lmer(response ~ pair * country + (1 | subid), 
-                         subset(d, (phase == "test" & study == "1") | 
-                                  (phase == "test" & study == "3")))
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
 anova(r3.orthCountrySimp, r3.orthCountryAdd, r3.orthCountryInt)
 anova(r3.orthCountrySimp, r3.orthCountryInt)
 summary(r3.orthCountryInt)
