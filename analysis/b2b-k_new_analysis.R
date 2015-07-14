@@ -238,6 +238,21 @@ r2.orthAbs <- lmer(abs(response) ~ pair + (1 | subid),
                    subset(d, phase == "test" & study == "2"))
 summary(r2.orthAbs)
 
+# adult/child comparison: orthogonal contrasts
+contrasts(d$pair, how.many = 10) <- contrastOrthogonal
+r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
+                          subset(d, (phase == "test" & study == "1") | 
+                                   (phase == "test" & study == "2")))
+r2.orthAgeGrpAdd <- lmer(response ~ pair + ageGroup + (1 | subid), 
+                         subset(d, (phase == "test" & study == "1") | 
+                                  (phase == "test" & study == "2")))
+r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid), 
+                         subset(d, (phase == "test" & study == "1") | 
+                                  (phase == "test" & study == "2")))
+anova(r2.orthAgeGrpSimp, r2.orthAgeGrpAdd, r2.orthAgeGrpInt)
+anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
+summary(r2.orthAgeGrpInt)
+
 # race/ethnicity comparison: chi-squared & t-tests tests
 # ... for age
 r2.tAge <- t.test(age ~ raceEthn2, var.equal = T, 
@@ -278,21 +293,6 @@ r2.orthREint <- lmer(response ~ pair * raceEthn2 + (1 | subid),
 anova(r2.orth, r2.orthREadd, r2.orthREint)
 anova(r2.orth, r2.orthREint)
 summary(r2.orthREint)
-
-# adult/child comparison: orthogonal contrasts
-contrasts(d$pair, how.many = 10) <- contrastOrthogonal
-r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
-                         subset(d, (phase == "test" & study == "1") | 
-                                  (phase == "test" & study == "2")))
-r2.orthAgeGrpAdd <- lmer(response ~ pair + ageGroup + (1 | subid), 
-                         subset(d, (phase == "test" & study == "1") | 
-                                  (phase == "test" & study == "2")))
-r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid), 
-                         subset(d, (phase == "test" & study == "1") | 
-                                  (phase == "test" & study == "2")))
-anova(r2.orthAgeGrpSimp, r2.orthAgeGrpAdd, r2.orthAgeGrpInt)
-anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
-summary(r2.orthAgeGrpInt)
 
 # --- STUDY 3 -----------------------------------------------------------------
 
