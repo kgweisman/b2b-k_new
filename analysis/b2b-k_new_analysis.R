@@ -241,22 +241,26 @@ summary(r2.orthAbs)
 # adult/child comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
-                          subset(d, (phase == "test" & study == "1") | 
-                                   (phase == "test" & study == "2")))
+                          subset(d, phase == "test" & 
+                                   (study == "1" | study == "2")))
 r2.orthAgeGrpAdd <- lmer(response ~ pair + ageGroup + (1 | subid), 
-                         subset(d, (phase == "test" & study == "1") | 
-                                  (phase == "test" & study == "2")))
+                         subset(d, phase == "test" & 
+                                  (study == "1" | study == "2")))
 r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid), 
-                         subset(d, (phase == "test" & study == "1") | 
-                                  (phase == "test" & study == "2")))
+                         subset(d, phase == "test" & 
+                                  (study == "1" | study == "2")))
 anova(r2.orthAgeGrpSimp, r2.orthAgeGrpAdd, r2.orthAgeGrpInt)
 anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
 summary(r2.orthAgeGrpInt)
 
 # race/ethnicity comparison: chi-squared & t-tests tests
 # ... for age
-r2.tAge <- t.test(age ~ raceEthn2, var.equal = T, 
-                  subset(d, phase == "test" & study == "2")); r2.tAge
+d.age <- d %>% 
+  filter(study == "2") %>%
+  select(subid, age, raceEthn2) %>%
+  distinct()
+
+r2.tAge <- t.test(age ~ raceEthn2, var.equal = T, d.age); r2.tAge
 
 # ... for gender
 r2.tableGender <- with(d %>% 
