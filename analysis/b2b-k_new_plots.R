@@ -8,6 +8,7 @@ library(lme4)
 library(stats)
 library(stringr)
 library(lubridate)
+library(RColorBrewer)
 
 # clear environment
 rm(list=ls())
@@ -242,10 +243,15 @@ plotQPFormat <- function(plot, scoreType) {
 #                     labels = c(" Affect ", " Autonomy ", 
 #                                " Perception ", " Inanimate Material "))
 #   
-    scale_fill_manual(name = "Question Category", 
-                      labels = c(" Affect ", " Autonomy ", 
+#     scale_fill_manual(name = "Question Category", 
+#                       labels = c(" Affect ", " Autonomy ", 
+#                                    " Perception ", " Inanimate Material "),
+#                       values = c("darkred", "darkgreen", "darkblue", "gray")) 
+
+      scale_fill_manual(name = "Question Category", 
+                        labels = c(" Affect ", " Autonomy ", 
                                    " Perception ", " Inanimate Material "),
-                      values = c("seagreen", "seagreen3", "seagreen1", "gray")) 
+                        values = c(brewer.pal(3, "Set2"), "grey")) 
 
   # provide study numbers in title
   if (length(studyNum) == 1) {
