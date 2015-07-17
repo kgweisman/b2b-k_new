@@ -84,7 +84,7 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
               data = subset(table, 
                             study == studyNum & country == countryName)) +
     geom_bar(aes(fill = questionCat), colour = "black",
@@ -107,7 +107,7 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
               data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(ageGroup ~ .,
@@ -134,7 +134,7 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
               data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(raceEthn2 ~ .,
@@ -161,7 +161,7 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
               data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(country ~ .,
@@ -188,7 +188,7 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
               data = subset(table, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
     facet_grid(country ~ framing,
@@ -505,8 +505,11 @@ refactor <- function(table) {
 sumTableQP <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
-  group_by(study, ageGroup, country, framing, sent, factCat, questionCat) %>%
+                       "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>% # used for ordering bars in graphs (1 = within)
+  group_by(study, ageGroup, country, framing, 
+           sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
             n = length(response[is.na(response) == F])) %>%
@@ -521,9 +524,11 @@ sumTableQP
 sumTableQPRE <- d %>%
   filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+                       "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>%
   group_by(study, ageGroup, country, raceEthn2, framing, 
-           sent, factCat, questionCat) %>%
+           sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
             n = length(response[is.na(response) == F])) %>%
@@ -541,8 +546,11 @@ sumTableQP_abs <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
                        "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2),
          response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, framing, sent, factCat, questionCat) %>%
+  group_by(study, ageGroup, country, framing, 
+           sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
             n = length(response_abs[is.na(response_abs) == F])) %>%
@@ -558,9 +566,11 @@ sumTableQPRE_abs <- d %>%
   filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
                        "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2),
          response_abs = abs(response)) %>%
   group_by(study, ageGroup, country, raceEthn2, framing, 
-           sent, factCat, questionCat) %>%
+           sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
             n = length(response_abs[is.na(response_abs) == F])) %>%
@@ -577,8 +587,11 @@ sumTableQPRE_abs
 sumTableQP_blank <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
-  group_by(study, ageGroup, country, framing, sent, factCat, questionCat) %>%
+                       "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>%
+  group_by(study, ageGroup, country, framing, 
+           sent, within, factCat, questionCat) %>%
   summarise(mean = 0,
             sd = 0,
             n = length(response[is.na(response) == F])) %>%
@@ -593,9 +606,11 @@ sumTableQP_blank
 sumTableQPRE_blank <- d %>%
   filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+                       "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>%
   group_by(study, ageGroup, country, raceEthn2, framing, 
-           sent, factCat, questionCat) %>%
+           sent, within, factCat, questionCat) %>%
   summarise(mean = 0,
             sd = 0,
             n = length(response[is.na(response) == F])) %>%
@@ -612,7 +627,9 @@ sumTableQPRE_blank
 sumTableSent <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-         "inanimate", "sentient-only")) %>%
+         "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>%
   group_by(study, ageGroup, country, framing, sent) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
@@ -628,7 +645,9 @@ sumTableSent
 sumTableSentRE <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+                       "inanimate", "sentient-only"), 
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>%
   group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
@@ -647,6 +666,8 @@ sumTableSent_abs <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
                        "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2),
          response_abs = abs(response)) %>%
   group_by(study, ageGroup, country, framing, sent) %>%
   summarise(mean = mean(response_abs, na.rm = T),
@@ -664,6 +685,8 @@ sumTableSentRE_abs <- d %>%
   filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
                        "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2),
          response_abs = abs(response)) %>%
   group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
   summarise(mean = mean(response_abs, na.rm = T),
@@ -682,7 +705,9 @@ sumTableSentRE_abs
 sumTableSent_blank <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+                       "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>%
   group_by(study, ageGroup, country, framing, sent) %>%
   summarise(mean = 0,
             sd = 0,
@@ -698,7 +723,9 @@ sumTableSent_blank
 sumTableSentRE_blank <- d %>%
   filter(study != "1prime" & phase == "test") %>%
   mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only")) %>%
+                       "inanimate", "sentient-only"),
+         within = ifelse(factCat == questionCat,
+                         1, 2)) %>%
   group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
   summarise(mean = 0,
             sd = 0,
