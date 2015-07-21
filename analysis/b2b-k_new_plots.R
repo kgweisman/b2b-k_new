@@ -84,7 +84,8 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
+  # to order by within vs. between: group = interaction(questionCat, within)
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(table, 
                             study == studyNum & country == countryName)) +
     geom_bar(aes(fill = questionCat), colour = "black",
@@ -107,7 +108,8 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
+  # to order by within vs. between: group = interaction(questionCat, within)
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(ageGroup ~ .,
@@ -134,7 +136,8 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
+  # to order by within vs. between: group = interaction(questionCat, within)
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(raceEthn2 ~ .,
@@ -161,7 +164,8 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
+  # to order by within vs. between: group = interaction(questionCat, within)
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(table, 
                             study == studyNum[1] | study == studyNum[2])) +
     facet_grid(country ~ .,
@@ -188,7 +192,8 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
   }
     
   # plot means
-  g <- ggplot(aes(x = factCat, y = mean, group = interaction(questionCat, within)), 
+  # to order by within vs. between: group = interaction(questionCat, within)
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(table, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
     facet_grid(country ~ framing,
@@ -235,20 +240,20 @@ plotQPFormat <- function(plot, scoreType) {
               legend.title = element_text(size = 21),
               plot.title = element_text(size = 28),
               strip.text = element_text(size = 28)) +
-        labs(x = "Fact Category", 
+        labs(x = "FACT Category", 
              y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
-      scale_x_discrete(labels = c("Affect", "Autonomy", 
-                                  "Perception", "Inanimate\nMaterial")) +
-#     scale_fill_grey(name = "Question Category", 
+      scale_x_discrete(labels = c("\nAffect", "\nAutonomy", 
+                                  "\nPerception", "\nInanimate\nMaterial")) +
+#     scale_fill_grey(name = "QUESTION Category", 
 #                     labels = c(" Affect ", " Autonomy ", 
 #                                " Perception ", " Inanimate Material "))
 #   
-#     scale_fill_manual(name = "Question Category", 
+#     scale_fill_manual(name = "QUESTION Category", 
 #                       labels = c(" Affect ", " Autonomy ", 
 #                                    " Perception ", " Inanimate Material "),
 #                       values = c("darkred", "darkgreen", "darkblue", "gray")) 
 
-      scale_fill_manual(name = "Question Category", 
+      scale_fill_manual(name = "QUESTION Category", 
                         labels = c(" Affect ", " Autonomy ", 
                                    " Perception ", " Inanimate Material "),
                         values = c(brewer.pal(3, "Set2"), "grey")) 
@@ -258,14 +263,14 @@ plotQPFormat <- function(plot, scoreType) {
     if (length(countryName) == 1 & length(ageGroup) == 1 & 
           length(raceEthn2) < 2) {
       g <- g + 
-        labs(title = paste0("Inferences by Fact and Question Category:\nStudy ",
+        labs(title = paste0("Study ",
                             studyNum, " (",
                             ifelse(countryName == "us", "US ", "Indian "),
                             str_to_title(ageGroup), ")"))
             
     } else {
       g <- g + 
-        labs(title = paste0("Inferences by Fact and Question Category: Study ",
+        labs(title = paste0("Study ",
                             studyNum))    
     }
   } else {
@@ -277,7 +282,7 @@ plotQPFormat <- function(plot, scoreType) {
     studies <- paste(studies, studyNum[length(studyNum)], sep = " & ")
     studies <- substring(studies, first = 3)
     g <- g + 
-      labs(title = paste0("Inferences by Fact and Question Category: Studies ",
+      labs(title = paste0("Studies ",
                           studies))
   }
   return(g)
