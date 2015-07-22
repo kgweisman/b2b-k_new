@@ -198,6 +198,13 @@ r1.orthAbs <- lmer(abs(response) ~ pair + (1 | subid),
                    subset(d, phase == "test" & study == "1"))
 summary(r1.orthAbs)
 
+# orthogonal contrasts on binary values
+contrasts(d$pair, how.many = 10) <- contrastOrthogonal
+r1.orthBin <- glmer(ynResponse ~ pair + (1 | subid),
+                   subset(d, phase == "test" & study == "1"), 
+                   family = "binomial")
+summary(r1.orthBin)
+
 # --- STUDY 1' ----------------------------------------------------------------
 
 # ------ planned analyses -----------------------------------------------------
@@ -238,6 +245,13 @@ r2.orthAbs <- lmer(abs(response) ~ pair + (1 | subid),
                    subset(d, phase == "test" & study == "2"))
 summary(r2.orthAbs)
 
+# orthogonal contrasts on binary values
+contrasts(d$pair, how.many = 10) <- contrastOrthogonal
+r2.orthBin <- glmer(ynResponse ~ pair + (1 | subid),
+                   subset(d, phase == "test" & study == "2"),
+                   family = "binomial")
+summary(r2.orthBin)
+
 # adult/child comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
@@ -252,6 +266,24 @@ r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid),
 anova(r2.orthAgeGrpSimp, r2.orthAgeGrpAdd, r2.orthAgeGrpInt)
 anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
 summary(r2.orthAgeGrpInt)
+
+# adult/child comparison: orthogonal contrasts on binary values
+contrasts(d$pair, how.many = 10) <- contrastOrthogonal
+r2.orthBinAgeGrpSimp <- glmer(ynResponse ~ pair + (1 | subid), 
+                          subset(d, phase == "test" & 
+                                   (study == "1" | study == "2")),
+                          family = "binomial")
+r2.orthBinAgeGrpAdd <- glmer(ynResponse ~ pair + ageGroup + (1 | subid), 
+                             subset(d, phase == "test" & 
+                                      (study == "1" | study == "2")),
+                             family = "binomial")
+r2.orthBinAgeGrpInt <- glmer(ynResponse ~ pair * ageGroup + (1 | subid),
+                             subset(d, phase == "test" & 
+                                      (study == "1" | study == "2")),
+                             family = "binomial")
+anova(r2.orthBinAgeGrpSimp, r2.orthBinAgeGrpAdd, r2.orthBinAgeGrpInt)
+anova(r2.orthBinAgeGrpSimp, r2.orthBinAgeGrpInt)
+summary(r2.orthBinAgeGrpInt)
 
 # race/ethnicity comparison: chi-squared & t-tests tests
 # ... for age
@@ -298,6 +330,18 @@ anova(r2.orth, r2.orthREadd, r2.orthREint)
 anova(r2.orth, r2.orthREint)
 summary(r2.orthREint)
 
+# race/ethnicity comparison: orthogonal contrasts on binary values
+contrasts(d$pair, how.many = 10) <- contrastOrthogonal
+r2.orthBinREadd <- glmer(ynResponse ~ pair + raceEthn2 + (1 | subid), 
+                     subset(d, phase == "test" & study == "2"),
+                     family = "binomial")
+r2.orthBinREint <- glmer(ynResponse ~ pair * raceEthn2 + (1 | subid), 
+                     subset(d, phase == "test" & study == "2"),
+                     family = "binomial")
+anova(r2.orth, r2.orthBinREadd, r2.orthBinREint)
+anova(r2.orth, r2.orthBinREint)
+summary(r2.orthBinREint)
+
 # --- STUDY 3 -----------------------------------------------------------------
 
 # ------ planned analyses -----------------------------------------------------
@@ -322,6 +366,13 @@ r3.orthAbs <- lmer(abs(response) ~ pair + (1 | subid),
                    subset(d, phase == "test" & study == "3"))
 summary(r3.orthAbs)
 
+# orthogonal contrasts on binary values
+contrasts(d$pair, how.many = 10) <- contrastOrthogonal
+r3.orthBin <- glmer(ynResponse ~ pair + (1 | subid), 
+                subset(d, phase == "test" & study == "3"),
+                family = "binomial")
+summary(r3.orthBin)
+
 # us/india comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r3.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
@@ -336,6 +387,24 @@ r3.orthCountryInt <- lmer(response ~ pair * country + (1 | subid),
 anova(r3.orthCountrySimp, r3.orthCountryAdd, r3.orthCountryInt)
 anova(r3.orthCountrySimp, r3.orthCountryInt)
 summary(r3.orthCountryInt)
+
+# us/india comparison: orthogonal contrasts on binary values
+contrasts(d$pair, how.many = 10) <- contrastOrthogonal
+r3.orthBinCountrySimp <- glmer(ynResponse ~ pair + (1 | subid), 
+                               subset(d, (phase == "test") & 
+                                        (study == "1" | study == "3")),
+                               family = "binomial")
+r3.orthBinCountryAdd <- glmer(ynResponse ~ pair + country + (1 | subid),
+                              subset(d, (phase == "test") &
+                                       (study == "1" | study == "3")),
+                              family = "binomial")
+r3.orthBinCountryInt <- glmer(ynResponse ~ pair * country + (1 | subid),
+                              subset(d, (phase == "test") &
+                                       (study == "1" | study == "3")),
+                              family = "binomial")
+anova(r3.orthBinCountrySimp, r3.orthBinCountryAdd, r3.orthBinCountryInt)
+anova(r3.orthBinCountrySimp, r3.orthBinCountryInt)
+summary(r3.orthBinCountryInt)
 
 # --- STUDY 4 -----------------------------------------------------------------
 
