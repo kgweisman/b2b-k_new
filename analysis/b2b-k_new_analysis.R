@@ -15,6 +15,103 @@ rm(list=ls())
 # set working directory
 setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_new/")
 
+# make funtion to print out min and max for beta and t by trial type
+minMaxSumReg <- function(regSummary, trialType = "all") {
+  if (trialType == "sentient-only") {
+    range <- c(1:3, 5:7, 9:11)
+  } else if (trialType == "inanimate") {
+    range <- c(4, 8, 12, 13:16)
+  } else if (trialType == "sentient-to-inanimate") {
+    range <- c(4, 8, 12)
+  } else if (trialType == "inanimate-to-sentient") {
+    range <- c(13:15)
+  } else {
+    range <- c(1:16)
+  }
+  
+  # sentient-only trials
+  betaMin <- min(summary(regSummary)$coefficients[range, 1])
+  betaMax <- max(summary(regSummary)$coefficients[range, 1])
+  tMin <- min(summary(regSummary)$coefficients[range, 3])
+  tMax <- max(summary(regSummary)$coefficients[range, 3])
+  
+  # print out table
+  table <- cbind("beta" = c(betaMin, betaMax),
+                 "t" = c(tMin, tMax))
+  row.names(table) = c("min", "max")
+  return(round(table, 2))
+}
+
+# make function to print out means by trial type
+meansPrint <- function(studyNum, countryName = "us", contrast) {
+  temp <- d %>% filter(study == studyNum &
+                         country == countryName &
+                         phase == "test")
+  sent <- temp %>% filter(grepl("phy", pair) == F)
+  inan <- temp %>% filter(grepl("phy", pair) == T)
+  within <- sent %>% filter(factCat == questionCat)
+  between <- sent %>% filter(factCat != questionCat)
+  snt_f_aff <- sent %>% filter(factCat == "aff")
+  snt_f_others <- sent %>% filter(factCat != "aff")
+  snt_f_aut <- sent %>% filter(factCat == "aut")
+  snt_f_per <- sent %>% filter(factCat == "per")
+  snt_q_aff <- sent %>% filter(questionCat == "aff")
+  snt_q_others <- sent %>% filter(questionCat != "aff")
+  snt_q_aut <- sent %>% filter(questionCat == "aut")
+  snt_q_per <- sent %>% filter(questionCat == "per")
+  inan_f_aff <- inan %>% filter(factCat == "aff")
+  inan_f_others <- inan %>% filter(factCat != "aff")
+  inan_f_aut <- inan %>% filter(factCat == "aut")
+  inan_f_per <- inan %>% filter(factCat == "per")
+  inan_q_aff <- inan %>% filter(questionCat == "aff")
+  inan_q_others <- inan %>% filter(questionCat != "aff")
+  inan_q_aut <- inan %>% filter(questionCat == "aut")
+  inan_q_per <- inan %>% filter(questionCat == "per")
+  
+  if (contrast == "sent.inanim") {
+    c1 <- sent
+    c2 <- inan
+  } else if (contrast == "snt_within.between") {
+    c1 <- within
+    c2 <- between
+  } else if (contrast == "snt_f_aff.othrs") {
+    c1 <- snt_f_aff
+    c2 <- snt_f_others
+  } else if (contrast == "snt_f_aut.per") {
+    c1 <- snt_f_aut
+    c2 <- snt_f_per
+  } else if (contrast == "snt_q_aff.othrs") {
+    c1 <- snt_q_aut
+    c2 <- snt_q_others
+  } else if (contrast == "snt_q_auth.per") {
+    c1 <- snt_q_aut
+    c2 <- snt_q_per
+  } else if (contrast == "inan_f_aff.othrs") {
+    c1 <- inan_f_aff
+    c2 <- inan_f_others
+  } else if (contrast == "inan_f_aut.per") {
+    c1 <- inan_f_aut
+    c2 <- inan_f_per
+  } else if (contrast == "inan_q_aff.othrs") {
+    c1 <- inan_q_aff
+    c2 <- inan_q_others
+  } else if (contrast == "inan_q_aut.per") {
+    c1 <- inan_q_aut
+    c2 <- inan_q_per
+  }
+  
+  c1m <- with(c1, mean(response, na.rm = T))
+  c1sd <- with(c1, sd(response, na.rm = T))
+  c2m <- with(c2, mean(response, na.rm = T))
+  c2sd <- with(c2, sd(response, na.rm = T))
+   
+  # print out table
+  table <- rbind("c1" = c(c1m, c1sd),
+                 "c2" = c(c2m, c2sd))
+  colnames(table) = c("mean", "sd")
+  return(list("contrast" = contrast, "summaryStats" = round(table, 2)))
+}
+
 # --- STUDY KEY ---------------------------------------------------------------
 
 # study 1 (2014-04-10)
@@ -77,7 +174,7 @@ sum_sequenceAssign <- d %>% distinct(subid) %>% group_by(study, country, sequenc
 # print(sum_sequenceAssign)
 
 # duration by study (minutes; adults only)
-sum_duration <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(durationOfTest), sd = sd(durationOfTest))
+sum_duration <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(durationOfTest), sd = sd(durationOfTest), min = min(durationOfTest), minus1sd = m - sd, plus1sd = m + sd, max = max(durationOfTest))
 # print(sum_duration)
 
 # gender by study
@@ -184,11 +281,34 @@ r1.neut <- lmer(response ~ -1 + pair + (1 | subid),
                 subset(d, phase == "test" & study == "1"))
 summary(r1.neut)
 
+minMaxSumReg(r1.neut, "sentient-only")
+minMaxSumReg(r1.neut, "sentient-to-inanimate")
+minMaxSumReg(r1.neut, "inanimate-to-sentient")
+
 # orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r1.orth <- lmer(response ~ pair + (1 | subid), 
                 subset(d, phase == "test" & study == "1"))
 summary(r1.orth)
+
+meansPrint("1", contrast = "sent.inanim")
+meansPrint("1", contrast = "snt_within.between")
+meansPrint("1", contrast = "snt_f_aff.othrs")
+meansPrint("1", contrast = "snt_f_aut.per")
+meansPrint("1", contrast = "snt_q_aff.othrs")
+meansPrint("1", contrast = "snt_q_auth.per")
+meansPrint("1", contrast = "inan_f_aff.othrs")
+meansPrint("1", contrast = "inan_f_aut.per")
+meansPrint("1", contrast = "inan_q_aff.othrs")
+meansPrint("1", contrast = "inan_q_aut.per")
+
+# affect-affect
+with(d %>% filter(study == "1" & country == "us" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     mean(response, na.rm = T))
+with(d %>% filter(study == "1" & country == "us" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     sd(response, na.rm = T))
 
 # ------ exploratory analyses -------------------------------------------------
 
@@ -215,11 +335,34 @@ r1prime.neut <- lmer(response ~ -1 + pair + (1 | subid),
                      subset(d, phase == "test" & study == "1prime"))
 summary(r1prime.neut)
 
+minMaxSumReg(r1prime.neut, "sentient-only")
+minMaxSumReg(r1prime.neut, "sentient-to-inanimate")
+minMaxSumReg(r1prime.neut, "inanimate-to-sentient")
+
 # orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r1prime.orth <- lmer(response ~ pair + (1 | subid), 
                      subset(d, phase == "test" & study == "1prime"))
 summary(r1prime.orth)
+
+meansPrint("1prime", contrast = "sent.inanim")
+meansPrint("1prime", contrast = "snt_within.between")
+meansPrint("1prime", contrast = "snt_f_aff.othrs")
+meansPrint("1prime", contrast = "snt_f_aut.per")
+meansPrint("1prime", contrast = "snt_q_aff.othrs")
+meansPrint("1prime", contrast = "snt_q_auth.per")
+meansPrint("1prime", contrast = "inan_f_aff.othrs")
+meansPrint("1prime", contrast = "inan_f_aut.per")
+meansPrint("1prime", contrast = "inan_q_aff.othrs")
+meansPrint("1prime", contrast = "inan_q_aut.per")
+
+# affect-affect
+with(d %>% filter(study == "1prime" & country == "us" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     mean(response, na.rm = T))
+with(d %>% filter(study == "1prime" & country == "us" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     sd(response, na.rm = T))
 
 # --- STUDY 2 -----------------------------------------------------------------
 
@@ -231,11 +374,33 @@ r2.neut <- lmer(response ~ -1 + pair + (1 | subid),
                 subset(d, phase == "test" & study == "2"))
 summary(r2.neut)
 
+minMaxSumReg(r2.neut, "sentient-only")
+minMaxSumReg(r2.neut, "inanimate")
+
 # orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r2.orth <- lmer(response ~ pair + (1 | subid), 
                 subset(d, phase == "test" & study == "2"))
 summary(r2.orth)
+
+meansPrint("2", contrast = "sent.inanim")
+meansPrint("2", contrast = "snt_within.between")
+meansPrint("2", contrast = "snt_f_aff.othrs")
+meansPrint("2", contrast = "snt_f_aut.per")
+meansPrint("2", contrast = "snt_q_aff.othrs")
+meansPrint("2", contrast = "snt_q_auth.per")
+meansPrint("2", contrast = "inan_f_aff.othrs")
+meansPrint("2", contrast = "inan_f_aut.per")
+meansPrint("2", contrast = "inan_q_aff.othrs")
+meansPrint("2", contrast = "inan_q_aut.per")
+
+# affect-affect
+with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     mean(response, na.rm = T))
+with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     sd(response, na.rm = T))
 
 # ------ exploratory analyses -------------------------------------------------
 
@@ -352,11 +517,33 @@ r3.neut <- lmer(response ~ -1 + pair + (1 | subid),
                 subset(d, phase == "test" & study == "3"))
 summary(r3.neut)
 
+minMaxSumReg(r3.neut, "sentient-only")
+minMaxSumReg(r3.neut, "inanimate")
+
 # orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r3.orth <- lmer(response ~ pair + (1 | subid), 
                 subset(d, phase == "test" & study == "3"))
 summary(r3.orth)
+
+meansPrint("3", countryName = "india", contrast = "sent.inanim")
+meansPrint("3", countryName = "india", contrast = "snt_within.between")
+meansPrint("3", countryName = "india", contrast = "snt_f_aff.othrs")
+meansPrint("3", countryName = "india", contrast = "snt_f_aut.per")
+meansPrint("3", countryName = "india", contrast = "snt_q_aff.othrs")
+meansPrint("3", countryName = "india", contrast = "snt_q_auth.per")
+meansPrint("3", countryName = "india", contrast = "inan_f_aff.othrs")
+meansPrint("3", countryName = "india", contrast = "inan_f_aut.per")
+meansPrint("3", countryName = "india", contrast = "inan_q_aff.othrs")
+meansPrint("3", countryName = "india", contrast = "inan_q_aut.per")
+
+# affect-affect
+with(d %>% filter(study == "3" & country == "india" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     mean(response, na.rm = T))
+with(d %>% filter(study == "3" & country == "india" & phase == "test") %>%
+       filter(factCat == "aff" & questionCat == "aff"), 
+     sd(response, na.rm = T))
 
 # ------ exploratory analyses -------------------------------------------------
 
@@ -422,6 +609,10 @@ anova(r4.neutCountrySimp, r4.neutCountryAdd, r4.neutCountryInt)
 anova(r4.neutCountrySimp, r4.neutCountryInt)
 summary(r4.neutCountryInt)
 
+# minMaxSumReg(r4.neutCountryInt, "sentient-only")
+# minMaxSumReg(r4.neutCountryInt, "sentient-to-inanimate")
+# minMaxSumReg(r4.neutCountryInt, "inanimate-to-sentient")
+
 # us/india comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
 r4.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
@@ -433,6 +624,25 @@ r4.orthCountryInt <- lmer(response ~ pair * country + (1 | subid),
 anova(r4.orthCountrySimp, r4.orthCountryAdd, r4.orthCountryInt)
 anova(r4.orthCountrySimp, r4.orthCountryInt)
 summary(r4.orthCountryInt)
+
+# meansPrint("4", contrast = "sent.inanim")
+# meansPrint("4", contrast = "snt_within.between")
+# meansPrint("4", contrast = "snt_f_aff.othrs")
+# meansPrint("4", contrast = "snt_f_aut.per")
+# meansPrint("4", contrast = "snt_q_aff.othrs")
+# meansPrint("4", contrast = "snt_q_auth.per")
+# meansPrint("4", contrast = "inan_f_aff.othrs")
+# meansPrint("4", contrast = "inan_f_aut.per")
+# meansPrint("4", contrast = "inan_q_aff.othrs")
+# meansPrint("4", contrast = "inan_q_aut.per")
+# 
+# # affect-affect
+# with(d %>% filter(study == "4" & country == "us" & phase == "test") %>%
+#        filter(factCat == "aff" & questionCat == "aff"), 
+#      mean(response, na.rm = T))
+# with(d %>% filter(study == "4" & country == "us" & phase == "test") %>%
+#        filter(factCat == "aff" & questionCat == "aff"), 
+#      sd(response, na.rm = T))
 
 # us/india comparison: orthogonal contrasts on absolute values
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
