@@ -209,6 +209,35 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
   return(g)
 }
 
+# make plotting function comparing fact-question pairings across countries
+plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
+  
+  # select which table to use
+  if (blank == T) {
+    table <- sumTableQP_blank
+  } else if (scoreType == "raw") {
+    table <- sumTableQP
+  } else if (scoreType == "abs") {
+    table <- sumTableQP_abs
+  }
+  
+  # plot means
+  # to order by within vs. between: group = interaction(questionCat, within)
+  g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
+              data = subset(table, study == studyNum[1] | 
+                              study == studyNum[2] | study == studyNum[3])) +
+    facet_grid(. ~ study,
+               labeller = labeller(
+                 study = c("1" = "US Adults", "2" = "US Children",
+                             "3" = "Indian Adults"))) +
+    geom_bar(aes(fill = questionCat), colour = "black",
+             position = "dodge", stat = "identity") + 
+    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    geom_hline(yintercept = 0, linetype = 2)
+  return(g)
+}
+
 # make plot-formatting function
 plotQPFormat <- function(plot, scoreType) {
   
@@ -803,6 +832,9 @@ r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw")
 # plot 4-way comparison of framing by country (adults)
 r134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw")
 
+# plot studies 1-3 in a row
+r123 <- plotQPFormat(plotQPCompStudies123(c("1", "2", "3"), "raw"), "raw")
+
 # ------ all possible fact-question pairings: ABSOLUTE VALUES OF SCORES -------
 
 # plot all possible fact-question pairings, by individual study
@@ -859,3 +891,11 @@ a4all_abs <- plotSentFormat(plotSentCompCountry(c("4", "4"), "abs"), "abs")
 
 # plot 4-way comparison of framing by country (adults)
 a134_abs <- plotSentFormat(plotSentCompFraming(c("1", "3", "4"), "abs"), "abs")
+
+# --- PLOTS FOR MANUSCRIPT ----------------------------------------------------
+
+# figure 1
+png(file="figure_01.png",width=2000,height=650)
+r123 <- plotQPFormat(plotQPCompStudies123(c("1", "2", "3"), "raw"), "raw")
+r123
+dev.off()
