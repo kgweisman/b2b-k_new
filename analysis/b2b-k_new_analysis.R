@@ -609,9 +609,9 @@ anova(r4.neutCountrySimp, r4.neutCountryAdd, r4.neutCountryInt)
 anova(r4.neutCountrySimp, r4.neutCountryInt)
 summary(r4.neutCountryInt)
 
-# minMaxSumReg(r4.neutCountryInt, "sentient-only")
-# minMaxSumReg(r4.neutCountryInt, "sentient-to-inanimate")
-# minMaxSumReg(r4.neutCountryInt, "inanimate-to-sentient")
+minMaxSumReg(r4.neutCountryInt, "sentient-only")
+minMaxSumReg(r4.neutCountryInt, "sentient-to-inanimate")
+minMaxSumReg(r4.neutCountryInt, "inanimate-to-sentient")
 
 # us/india comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 10) <- contrastOrthogonal
@@ -625,7 +625,7 @@ anova(r4.orthCountrySimp, r4.orthCountryAdd, r4.orthCountryInt)
 anova(r4.orthCountrySimp, r4.orthCountryInt)
 summary(r4.orthCountryInt)
 
-# meansPrint("4", contrast = "sent.inanim")
+meansPrint("4", contrast = "sent.inanim")
 # meansPrint("4", contrast = "snt_within.between")
 # meansPrint("4", contrast = "snt_f_aff.othrs")
 # meansPrint("4", contrast = "snt_f_aut.per")
