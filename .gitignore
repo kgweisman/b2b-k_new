@@ -9,3 +9,6 @@ turk/*/sandbox-results/
 *raw*
 .Rproj.user
 *messy*
+*.png
+*.jpg
+*.pdf
