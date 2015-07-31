@@ -67,6 +67,8 @@ meansPrint <- function(studyNum, countryName = "us", contrast) {
   inan_q_others <- inan %>% filter(questionCat != "aff")
   inan_q_aut <- inan %>% filter(questionCat == "aut")
   inan_q_per <- inan %>% filter(questionCat == "per")
+  inan_phyphy <- inan %>% filter(factCat == questionCat)
+  inan_others <- inan %>% filter(factCat != questionCat)
   
   if (contrast == "sent.inanim") {
     c1 <- sent
@@ -98,6 +100,9 @@ meansPrint <- function(studyNum, countryName = "us", contrast) {
   } else if (contrast == "inan_q_aut.per") {
     c1 <- inan_q_aut
     c2 <- inan_q_per
+  } else if (contrast == "inan_phyphy.othrs") {
+    c1 <- inan_phyphy
+    c2 <- inan_others
   }
   
   c1m <- with(c1, mean(response, na.rm = T))
@@ -228,6 +233,9 @@ contrastOrthogonal <- pairsTable %>%
          snt_q_aut.per = ifelse(sent.inanim > 0 & questionCat == "aut", 1,
                                 ifelse(sent.inanim > 0 & questionCat == "per", 
                                        -1, 0)),
+         inan_phyphy.othrs = ifelse(sent.inanim < 0 &
+                                      factCat == questionCat, 6,
+                                    ifelse(sent.inanim < 0, -1, 0)),
          inan_f_aff.othrs = ifelse(sent.inanim < 0 & factCat == "aff", 2,
                                   ifelse(sent.inanim < 0 & factCat != "phy", 
                                          -1, 0)),
@@ -243,10 +251,7 @@ contrastOrthogonal <- pairsTable %>%
                                    factCat == "phy" & questionCat == "aut", 1,
                                 ifelse(sent.inanim < 0 & 
                                          factCat == "phy" & questionCat == "per", 
-                                       -1, 0)),
-         phyphy.phyothr = ifelse(sent.inanim < 0 &
-                                   factCat == questionCat, -6,
-                                 ifelse(sent.inanim < 0, 1, 0))) %>%
+                                       -1, 0))) %>%
   select(-factCat, -questionCat)
 
 contrastOrthogonal <- contrastOrthogonal[-1]
@@ -304,6 +309,7 @@ meansPrint("1", contrast = "inan_f_aff.othrs")
 meansPrint("1", contrast = "inan_f_aut.per")
 meansPrint("1", contrast = "inan_q_aff.othrs")
 meansPrint("1", contrast = "inan_q_aut.per")
+meansPrint("1", contrast = "inan_phyphy.othrs")
 
 # affect-affect
 with(d %>% filter(study == "1" & country == "us" & phase == "test") %>%
