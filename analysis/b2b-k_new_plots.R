@@ -226,7 +226,7 @@ plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
   g <- ggplot(aes(x = factCat, y = mean, group = questionCat), 
               data = subset(table, study == studyNum[1] | 
                               study == studyNum[2] | study == studyNum[3])) +
-    facet_grid(. ~ study,
+    facet_grid(study ~ .,
                labeller = labeller(
                  study = c("1" = "US Adults", "2" = "US Children",
                              "3" = "Indian Adults"))) +
@@ -895,7 +895,20 @@ a134_abs <- plotSentFormat(plotSentCompFraming(c("1", "3", "4"), "abs"), "abs")
 # --- PLOTS FOR MANUSCRIPT ----------------------------------------------------
 
 # figure 1
-png(file="figure_01.png",width=2000,height=650)
+png(file="figure_01.png",width=850,height=1000)
 r123 <- plotQPFormat(plotQPCompStudies123(c("1", "2", "3"), "raw"), "raw")
 r123
 dev.off()
+
+# figure 2
+png(file="figure_02.png",width=850,height=700)
+r2re <- plotQPFormat(plotQPCompRE(c("2", "2"), "raw"), "raw")
+r2re
+dev.off()
+
+# figure 3
+png(file="figure_03.png",width=850,height=700)
+r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw")
+r4all
+dev.off()
+
