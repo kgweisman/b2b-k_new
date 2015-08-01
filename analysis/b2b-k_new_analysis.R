@@ -486,20 +486,36 @@ r2.chisqSequence <- summary(r2.tableSequence); r2.chisqSequence
 
 # race/ethnicity comparison: comparison to neutral
 contrasts(d$pair) <- contrastNeutral
-r2.neutREadd <- lmer(response ~ -1 + pair + raceEthn2 + (1 | subid), 
-                     subset(d, phase == "test" & study == "2"))
-r2.neutREint <- lmer(response ~ -1 + pair * raceEthn2 + (1 | subid), 
-                     subset(d, phase == "test" & study == "2"))
+r2.neutREsimp <- lmer(response ~ pair + (1 | subid), 
+                      data = subset(d, phase == "test" & 
+                                      study == "2" & 
+                                      raceEthn2 != "NA"))
+r2.neutREadd <- lmer(response ~ pair + raceEthn2 + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     raceEthn2 != "NA"))
+r2.neutREint <- lmer(response ~ pair * raceEthn2 + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     raceEthn2 != "NA"))
 anova(r2.neut, r2.neutREadd, r2.neutREint)
 anova(r2.neut, r2.neutREint)
 summary(r2.neutREint)
 
 # race/ethnicity comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r2.orthREsimp <- lmer(response ~ pair + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     raceEthn2 != "NA"))
 r2.orthREadd <- lmer(response ~ pair + raceEthn2 + (1 | subid), 
-                     subset(d, phase == "test" & study == "2"))
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     raceEthn2 != "NA"))
 r2.orthREint <- lmer(response ~ pair * raceEthn2 + (1 | subid), 
-                     subset(d, phase == "test" & study == "2"))
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     raceEthn2 != "NA"))
 anova(r2.orth, r2.orthREadd, r2.orthREint)
 anova(r2.orth, r2.orthREint)
 summary(r2.orthREint)
@@ -569,6 +585,21 @@ summary(r3.orthAbs)
 #                 family = "binomial")
 # summary(r3.orthBin)
 
+# us/india comparison: neutral contrasts
+contrasts(d$pair) <- contrastNeutral
+r3.neutCountrySimp <- lmer(response ~ pair + (1 | subid), 
+                           subset(d, (phase == "test") & 
+                                    (study == "1" | study == "3")))
+r3.neutCountryAdd <- lmer(response ~ pair + country + (1 | subid), 
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
+r3.neutCountryInt <- lmer(response ~ pair * country + (1 | subid), 
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
+anova(r3.neutCountrySimp, r3.neutCountryAdd, r3.neutCountryInt)
+anova(r3.neutCountrySimp, r3.neutCountryInt)
+summary(r3.neutCountryInt)
+
 # us/india comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r3.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
@@ -620,6 +651,22 @@ summary(r4.neutCountryInt)
 
 minMaxSumReg(r4.neutCountryInt, "sentient-only")
 minMaxSumReg(r4.neutCountryInt, "inanimate")
+
+# hand-make minMax for interactions
+interactions <- summary(r4.neutCountryInt)$coefficients[18:32,c(1,4)]
+betaMin <- c(min(interactions[c(1:2, 4:6, 8:10), 1]),
+             min(interactions[c(3, 7, 11:15), 1]))
+betaMax <- c(max(interactions[c(1:2, 4:6, 8:10), 1]),
+             max(interactions[c(3, 7, 11:15), 1]))
+tMin <- c(min(interactions[c(1:2, 4:6, 8:10), 2]),
+             min(interactions[c(3, 7, 11:15), 2]))
+tMax <- c(max(interactions[c(1:2, 4:6, 8:10), 2]),
+             max(interactions[c(3, 7, 11:15), 2]))
+minMaxTable <- cbind("beta" = c(betaMin, betaMax),
+               "t" = c(tMin, tMax))
+row.names(minMaxTable) = c("sent_min", "inan_min",
+                           "sent_max", "inan_max")
+round(minMaxTable, 2)
 
 # us/india comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
