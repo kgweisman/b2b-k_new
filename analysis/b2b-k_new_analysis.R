@@ -311,6 +311,8 @@ meansPrint("1", contrast = "inan_q_aff.othrs")
 meansPrint("1", contrast = "inan_q_aut.per")
 meansPrint("1", contrast = "inan_phyphy.othrs")
 
+round(summary(r1.orth)$coefficients,2)
+
 # affect-affect
 with(d %>% filter(study == "1" & country == "us" & phase == "test") %>%
        filter(factCat == "aff" & questionCat == "aff"), 
@@ -403,6 +405,8 @@ meansPrint("2", contrast = "inan_f_aut.per")
 meansPrint("2", contrast = "inan_q_aff.othrs")
 meansPrint("2", contrast = "inan_q_aut.per")
 
+round(summary(r2.orth)$coefficients,2)
+
 # affect-affect
 with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
        filter(factCat == "aff" & questionCat == "aff"), 
@@ -440,6 +444,8 @@ r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid),
 anova(r2.orthAgeGrpSimp, r2.orthAgeGrpAdd, r2.orthAgeGrpInt)
 anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
 summary(r2.orthAgeGrpInt)
+
+round(summary(r2.orthAgeGrpInt)$coefficients,2)
 
 # # adult/child comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -498,8 +504,8 @@ r2.neutREint <- lmer(response ~ pair * raceEthn2 + (1 | subid),
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
-anova(r2.neut, r2.neutREadd, r2.neutREint)
-anova(r2.neut, r2.neutREint)
+anova(r2.neutREsimp, r2.neutREadd, r2.neutREint)
+anova(r2.neutREsimp, r2.neutREint)
 summary(r2.neutREint)
 
 # race/ethnicity comparison: orthogonal contrasts
@@ -516,9 +522,11 @@ r2.orthREint <- lmer(response ~ pair * raceEthn2 + (1 | subid),
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
-anova(r2.orth, r2.orthREadd, r2.orthREint)
-anova(r2.orth, r2.orthREint)
+anova(r2.orthREsimp, r2.orthREadd, r2.orthREint)
+anova(r2.orthREsimp, r2.orthREint)
 summary(r2.orthREint)
+
+round(summary(r2.orthREint)$coefficients,2)
 
 # # race/ethnicity comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -561,6 +569,8 @@ meansPrint("3", countryName = "india", contrast = "inan_f_aff.othrs")
 meansPrint("3", countryName = "india", contrast = "inan_f_aut.per")
 meansPrint("3", countryName = "india", contrast = "inan_q_aff.othrs")
 meansPrint("3", countryName = "india", contrast = "inan_q_aut.per")
+
+round(summary(r3.orth)$coefficients,2)
 
 # affect-affect
 with(d %>% filter(study == "3" & country == "india" & phase == "test") %>%
@@ -615,6 +625,8 @@ anova(r3.orthCountrySimp, r3.orthCountryAdd, r3.orthCountryInt)
 anova(r3.orthCountrySimp, r3.orthCountryInt)
 summary(r3.orthCountryInt)
 
+round(summary(r3.orthCountryInt)$coefficients,2)
+
 # # us/india comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 # r3.orthBinCountrySimp <- glmer(ynResponse ~ pair + (1 | subid), 
@@ -653,7 +665,7 @@ minMaxSumReg(r4.neutCountryInt, "sentient-only")
 minMaxSumReg(r4.neutCountryInt, "inanimate")
 
 # hand-make minMax for interactions
-interactions <- summary(r4.neutCountryInt)$coefficients[18:32,c(1,4)]
+interactions <- summary(r4.neutCountryInt)$coefficients[18:32,c(1,3)]
 betaMin <- c(min(interactions[c(1:2, 4:6, 8:10), 1]),
              min(interactions[c(3, 7, 11:15), 1]))
 betaMax <- c(max(interactions[c(1:2, 4:6, 8:10), 1]),
@@ -679,6 +691,8 @@ r4.orthCountryInt <- lmer(response ~ pair * country + (1 | subid),
 anova(r4.orthCountrySimp, r4.orthCountryAdd, r4.orthCountryInt)
 anova(r4.orthCountrySimp, r4.orthCountryInt)
 summary(r4.orthCountryInt)
+
+round(summary(r4.orthCountryInt)$coefficients,2)
 
 meansPrint("4", contrast = "sent.inanim")
 meansPrint("4", contrast = "snt_within.between")
@@ -732,6 +746,8 @@ anova(r4.orthCntryFrmSimp, r4.orthCntryFrmAdd,
       r4.orthCntryFrmInt1, r4.orthCntryFrmInt2)
 anova(r4.orthCntryFrmSimp, r4.orthCntryFrmInt2)
 summary(r4.orthCntryFrmInt2)
+
+round(summary(r4.orthCntryFrmInt2)$coefficients, 2)
 
 # us/india comparison, framing comparison: orthogonal contrasts on absolute values
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
