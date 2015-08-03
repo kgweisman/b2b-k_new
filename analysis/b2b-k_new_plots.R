@@ -92,7 +92,9 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -119,7 +121,9 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -147,7 +151,9 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -175,7 +181,9 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -205,7 +213,9 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -234,7 +244,9 @@ plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -339,7 +351,9 @@ plotSent <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
              position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -366,7 +380,9 @@ plotSentCompAge <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -394,7 +410,9 @@ plotSentCompRE <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -421,7 +439,9 @@ plotSentCompCountry <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -450,7 +470,9 @@ plotSentCompFraming <- function(studyNum, scoreType, blank = F) {
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 2)
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3)
   return(g)
 }
 
@@ -896,24 +918,28 @@ a134_abs <- plotSentFormat(plotSentCompFraming(c("1", "3", "4"), "abs"), "abs")
 
 # figure 1
 png(file="figure_01.png",width=850,height=1000)
-r123 <- plotQPFormat(plotQPCompStudies123(c("1", "2", "3"), "raw"), "raw")
+r123 <- plotQPFormat(plotQPCompStudies123(c("1", "2", "3"), "raw"), "raw") +
+  theme(panel.margin = grid::unit(1.5, "lines"))
 r123
 dev.off()
 
 # figure 2
 png(file="figure_02.png",width=850,height=700)
-r2re <- plotQPFormat(plotQPCompRE(c("2", "2"), "raw"), "raw")
+r2re <- plotQPFormat(plotQPCompRE(c("2", "2"), "raw"), "raw") +
+  theme(panel.margin = grid::unit(1.5, "lines"))
 r2re
 dev.off()
 
 # figure 3
 png(file="figure_03.png",width=850,height=700)
-r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw")
+r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw") +
+  theme(panel.margin = grid::unit(1.5, "lines"))
 r4all
 dev.off()
 
 # figure 4
 png(file="figure_04.png",width=1200,height=700)
-r134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw")
+r134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw") +
+  theme(panel.margin = grid::unit(1.5, "lines"))
 r134
 dev.off()
