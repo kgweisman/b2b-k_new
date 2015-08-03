@@ -912,3 +912,8 @@ r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw")
 r4all
 dev.off()
 
+# figure 4
+png(file="figure_04.png",width=1200,height=700)
+r134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw")
+r134
+dev.off()
