@@ -9,6 +9,7 @@ library(stats)
 library(stringr)
 library(lubridate)
 library(RColorBrewer)
+library(langcog)
 
 # clear environment
 rm(list=ls())
@@ -101,11 +102,8 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
-  return(g)
+                  position = position_dodge(0.9), width = .2, size = .3) 
+    return(g)
 }
 
 # make plotting function comparing fact-question pairings across age groups
@@ -130,10 +128,7 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -160,10 +155,7 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -190,10 +182,7 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -222,10 +211,7 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -253,10 +239,7 @@ plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -273,9 +256,9 @@ plotQPFormat <- function(plot, scoreType) {
     raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
   }
   if (scoreType == "raw") {
-    ylim = c(-1.5, 1.5)
+    ylim = c(-1.75, 1.75)
   } else if (scoreType == "abs") {
-    ylim = c(0, 1.5)
+    ylim = c(0, 1.75)
   }
   
   # plot
@@ -360,10 +343,7 @@ plotSent <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -389,10 +369,7 @@ plotSentCompAge <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -419,10 +396,7 @@ plotSentCompRE <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -448,10 +422,7 @@ plotSentCompCountry <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -479,10 +450,7 @@ plotSentCompFraming <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    geom_hline(yintercept = 0, linetype = 1) +
-    geom_hline(yintercept = -0.5, linetype = 3) +
-    geom_hline(yintercept = 0.5, linetype = 3)
+                  position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
 
@@ -499,9 +467,9 @@ plotSentFormat <- function(plot, scoreType) {
     raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
   }
   if (scoreType == "raw") {
-    ylim = c(-1.5, 1.5)
+    ylim = c(-1.75, 1.75)
   } else if (scoreType == "abs") {
-    ylim = c(0, 1.5)
+    ylim = c(0, 1.75)
   }
   
   # plot
@@ -948,7 +916,12 @@ plotSoup <- function(g, studies) {
                   label = paste0('"', 
                                  R.utils::capitalize(respWording), 
                                  ' yes"')),
-              hjust = 1.25, vjust = -0.5, size = 5.5)
+              hjust = 1.25, vjust = -0.5, size = 5.5) +
+    geom_hline(yintercept = 0, linetype = 1) +
+    geom_hline(yintercept = -1.5, linetype = 3) +
+    geom_hline(yintercept = -0.5, linetype = 3) +
+    geom_hline(yintercept = 0.5, linetype = 3) +
+    geom_hline(yintercept = 1.5, linetype = 3)
   return(g)
 }
 
