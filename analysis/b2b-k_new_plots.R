@@ -23,6 +23,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
+# - RESPONSE WORDING: "maybe yes/no"
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 1' (2014-05-23) - SUPPLEMENTAL
@@ -30,6 +31,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
+# - RESPONSE WORDING: "maybe yes/no"
 # - ITEM SET: cb2 (affect: positive/negative valence & high/low arousal)
 
 # study 2 (spring 2014 - fall 2014)
@@ -37,6 +39,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - COUNTRY: us
 # - AGE GROUP: children
 # - FRAMING: "does that mean...?" 
+# - RESPONSE WORDING: "sort of yes/no"
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 3 (2014-06-17)
@@ -44,6 +47,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - COUNTRY: india
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
+# - RESPONSE WORDING: "maybe yes/no"
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # study 4a (2014-06-25)
@@ -58,12 +62,18 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - COUNTRY: india
 # - AGE GROUP: adults
 # - FRAMING: "do you think...?" 
+# - RESPONSE WORDING: "maybe yes/no"
 # - ITEM SET: cb1 (affect: positive/negative valence)
 
 # --- IMPORTING DATA ----------------------------------------------------------
 
 # read in data
 d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv")[-1] # delete observation numbers
+
+# add response wording variable
+d <- d %>%
+  mutate(respWording = factor(ifelse(ageGroup == "children", 
+                                     "sort of", "maybe")))
 
 # glimpse(d)
 
@@ -207,8 +217,8 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
     facet_grid(country ~ framing,
                labeller = labeller(
                  country = c("india" = "Indian Adults", "us" = "US Adults"),
-                 framing = c("do you think...?" = "Do you think...?",
-                             "does that mean...?" = "Does that mean...?"))) +
+                 framing = c("do you think...?" = '"Do you think...?"',
+                             "does that mean...?" = '"Does that mean...?"'))) +
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
@@ -272,15 +282,15 @@ plotQPFormat <- function(plot, scoreType) {
   g <- plot +
         coord_cartesian(ylim = ylim) +
         theme_bw() +
-        theme(text = element_text(size = 28),
-              axis.text = element_text(size = 21),
-              axis.title = element_text(size = 28),
-              axis.text.x = element_text(size = 28),
+        theme(text = element_text(size = 24),
+              axis.text = element_text(size = 18),
+              axis.title = element_text(size = 24),
+              axis.text.x = element_text(size = 24),
               legend.position = "top",
-              legend.text = element_text(size = 21),
-              legend.title = element_text(size = 21),
-              plot.title = element_text(size = 28),
-              strip.text = element_text(size = 28)) +
+              legend.text = element_text(size = 18),
+              legend.title = element_text(size = 18),
+              plot.title = element_text(size = 24),
+              strip.text = element_text(size = 24)) +
         labs(x = "FACT Category", 
              y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
       scale_x_discrete(labels = c("\nAffect", "\nAutonomy", 
@@ -464,8 +474,8 @@ plotSentCompFraming <- function(studyNum, scoreType, blank = F) {
     facet_grid(country ~ framing,
                labeller = labeller(
                  country = c("india" = "Indian Adults", "us" = "US Adults"),
-                 framing = c("do you think...?" = "Do you think...?",
-                             "does that mean...?" = "Does that mean...?"))) +
+                 framing = c("do you think...?" = '"Do you think...?"',
+                             "does that mean...?" = '"Does that mean...?"'))) +
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
@@ -498,15 +508,15 @@ plotSentFormat <- function(plot, scoreType) {
   g <- plot +
     coord_cartesian(ylim = ylim) +
     theme_bw() +
-    theme(text = element_text(size = 28),
-          axis.text = element_text(size = 21),
-          axis.title = element_text(size = 28),
-          axis.text.x = element_text(size = 28),
+    theme(text = element_text(size = 24),
+          axis.text = element_text(size = 18),
+          axis.title = element_text(size = 24),
+          axis.text.x = element_text(size = 24),
           legend.position = "top",
-          legend.text = element_text(size = 21),
-          legend.title = element_text(size = 21),
-          plot.title = element_text(size = 28),
-          strip.text = element_text(size = 28)) +
+          legend.text = element_text(size = 18),
+          legend.title = element_text(size = 18),
+          plot.title = element_text(size = 24),
+          strip.text = element_text(size = 24)) +
     labs(x = "Trial Type", 
          y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
     scale_x_discrete(labels = c("Inanimate", "Sentient-Only")) 
@@ -543,7 +553,7 @@ plotSentFormat <- function(plot, scoreType) {
 
 # --- SUMMARY TABLES ----------------------------------------------------------
 
-# make refactoring function to reo, scoreTyperder levels
+# make refactoring function to reorder levels
 refactor <- function(table) {
   table$ageGroup = factor(table$ageGroup, levels = c("adults", "children"))
   table$country = factor(table$country, levels = c("us", "india"))
@@ -564,7 +574,7 @@ sumTableQP <- d %>%
                        "inanimate", "sentient-only"),
          within = ifelse(factCat == questionCat,
                          1, 2)) %>% # used for ordering bars in graphs (1 = within)
-  group_by(study, ageGroup, country, framing, 
+  group_by(study, ageGroup, country, framing, respWording,
            sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
@@ -583,7 +593,7 @@ sumTableQPRE <- d %>%
                        "inanimate", "sentient-only"),
          within = ifelse(factCat == questionCat,
                          1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, 
+  group_by(study, ageGroup, country, raceEthn2, framing, respWording,
            sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
@@ -605,7 +615,7 @@ sumTableQP_abs <- d %>%
          within = ifelse(factCat == questionCat,
                          1, 2),
          response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, framing, 
+  group_by(study, ageGroup, country, framing, respWording,
            sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
@@ -625,7 +635,7 @@ sumTableQPRE_abs <- d %>%
          within = ifelse(factCat == questionCat,
                          1, 2),
          response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, 
+  group_by(study, ageGroup, country, raceEthn2, framing, respWording,
            sent, within, factCat, questionCat) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
@@ -646,7 +656,7 @@ sumTableQP_blank <- d %>%
                        "inanimate", "sentient-only"),
          within = ifelse(factCat == questionCat,
                          1, 2)) %>%
-  group_by(study, ageGroup, country, framing, 
+  group_by(study, ageGroup, country, framing, respWording,
            sent, within, factCat, questionCat) %>%
   summarise(mean = 0,
             sd = 0,
@@ -665,7 +675,7 @@ sumTableQPRE_blank <- d %>%
                        "inanimate", "sentient-only"),
          within = ifelse(factCat == questionCat,
                          1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, 
+  group_by(study, ageGroup, country, raceEthn2, framing, respWording,
            sent, within, factCat, questionCat) %>%
   summarise(mean = 0,
             sd = 0,
@@ -686,7 +696,7 @@ sumTableSent <- d %>%
          "inanimate", "sentient-only"),
          within = ifelse(factCat == questionCat,
                          1, 2)) %>%
-  group_by(study, ageGroup, country, framing, sent) %>%
+  group_by(study, ageGroup, country, framing, respWording, sent) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
             n = length(response[is.na(response) == F])) %>%
@@ -704,7 +714,7 @@ sumTableSentRE <- d %>%
                        "inanimate", "sentient-only"), 
          within = ifelse(factCat == questionCat,
                          1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, respWording, sent) %>%
   summarise(mean = mean(response, na.rm = T),
             sd = sd(response, na.rm = T),
             n = length(response[is.na(response) == F])) %>%
@@ -725,7 +735,7 @@ sumTableSent_abs <- d %>%
          within = ifelse(factCat == questionCat,
                          1, 2),
          response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, framing, sent) %>%
+  group_by(study, ageGroup, country, framing, respWording, sent) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
             n = length(response_abs[is.na(response_abs) == F])) %>%
@@ -744,7 +754,7 @@ sumTableSentRE_abs <- d %>%
          within = ifelse(factCat == questionCat,
                          1, 2),
          response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, respWording, sent) %>%
   summarise(mean = mean(response_abs, na.rm = T),
             sd = sd(response_abs, na.rm = T),
             n = length(response_abs[is.na(response_abs) == F])) %>%
@@ -764,7 +774,7 @@ sumTableSent_blank <- d %>%
                        "inanimate", "sentient-only"),
          within = ifelse(factCat == questionCat,
                          1, 2)) %>%
-  group_by(study, ageGroup, country, framing, sent) %>%
+  group_by(study, ageGroup, country, framing, respWording, sent) %>%
   summarise(mean = 0,
             sd = 0,
             n = length(response[is.na(response) == F])) %>%
@@ -782,7 +792,7 @@ sumTableSentRE_blank <- d %>%
                        "inanimate", "sentient-only"),
          within = ifelse(factCat == questionCat,
                          1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, sent) %>%
+  group_by(study, ageGroup, country, raceEthn2, framing, respWording, sent) %>%
   summarise(mean = 0,
             sd = 0,
             n = length(response[is.na(response) == F])) %>%
@@ -916,30 +926,48 @@ a134_abs <- plotSentFormat(plotSentCompFraming(c("1", "3", "4"), "abs"), "abs")
 
 # --- PLOTS FOR MANUSCRIPT ----------------------------------------------------
 
+# make "soup-up" function for annotating plots
+plotSoup <- function(g, studies) {
+  dLabels <- d %>%
+    select(study, country, ageGroup, framing, itemSet, respWording, 
+           factCat, questionCat) %>%
+    filter(factCat == "aff" & questionCat == "aff") %>%
+    distinct() %>%
+    filter(study %in% studies)
+
+  g <- g +
+    theme(panel.margin = grid::unit(1.5, "lines")) +
+    geom_text(data = dLabels,
+             aes(x = -Inf, y = -.5,
+                 label = paste0('"', 
+                                R.utils::capitalize(respWording), 
+                                ' no"')),
+             hjust = -0.25, vjust = 1.5, size = 5.5) +
+    geom_text(data = dLabels,
+              aes(x = Inf, y = .5,
+                  label = paste0('"', 
+                                 R.utils::capitalize(respWording), 
+                                 ' yes"')),
+              hjust = 1.25, vjust = -0.5, size = 5.5)
+  return(g)
+}
+
 # figure 1
 png(file="figure_01.png",width=850,height=1000)
-r123 <- plotQPFormat(plotQPCompStudies123(c("1", "2", "3"), "raw"), "raw") +
-  theme(panel.margin = grid::unit(1.5, "lines"))
-r123
+plotSoup(r123, studies = c(1:3))
 dev.off()
 
 # figure 2
 png(file="figure_02.png",width=850,height=700)
-r2re <- plotQPFormat(plotQPCompRE(c("2", "2"), "raw"), "raw") +
-  theme(panel.margin = grid::unit(1.5, "lines"))
-r2re
+plotSoup(r2re, studies = 2)
 dev.off()
 
 # figure 3
 png(file="figure_03.png",width=850,height=700)
-r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw") +
-  theme(panel.margin = grid::unit(1.5, "lines"))
-r4all
+plotSoup(r4all, studies = 4)
 dev.off()
 
 # figure 4
 png(file="figure_04.png",width=1200,height=700)
-r134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw") +
-  theme(panel.margin = grid::unit(1.5, "lines"))
-r134
+plotSoup(r134, studies = c(1,3:4))
 dev.off()
