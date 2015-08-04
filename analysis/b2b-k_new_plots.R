@@ -73,8 +73,16 @@ d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv"
 
 # add response wording variable
 d <- d %>%
-  mutate(respWording = factor(ifelse(ageGroup == "children", 
-                                     "sort of", "maybe")))
+  filter(study != "1prime" & # remove alternative itemSet
+         phase == "test" & # include only test trials
+         response != "NA") %>% # remove NAs on 4-point responses
+  # create variables for trialType and wording of responses
+  mutate(sent = factor(ifelse(factCat == "phy" | questionCat == "phy",
+                              "inanimate", "sentient-only")), 
+         within = factor(ifelse(factCat == questionCat, 1, 2)), # (1 = within)
+         respWording = factor(ifelse(ageGroup == "children", 
+                                     "sort of", "maybe")),
+         response_abs = abs(response))
 
 # glimpse(d)
 
@@ -101,7 +109,7 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
                             study == studyNum & country == countryName)) +
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3) 
     return(g)
 }
@@ -127,7 +135,7 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
                                                "children" = "US Children"))) +
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -154,7 +162,7 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
                                                "white" = "White Children"))) +
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -181,7 +189,7 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
                                                "us" = "US Adults"))) +
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -210,7 +218,7 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
                              "does that mean...?" = '"Does that mean...?"'))) +
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -238,7 +246,7 @@ plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
                              "3" = "Indian Adults"))) +
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -342,7 +350,7 @@ plotSent <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
                             study == studyNum & country == countryName)) +
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") +
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -368,7 +376,7 @@ plotSentCompAge <- function(studyNum, scoreType, blank = F) {
                                                 "children" = "US Children"))) +
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -395,7 +403,7 @@ plotSentCompRE <- function(studyNum, scoreType, blank = F) {
                                                  "white" = "White Children"))) +
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -421,7 +429,7 @@ plotSentCompCountry <- function(studyNum, scoreType, blank = F) {
                                                "us" = "US Adults"))) +
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -449,7 +457,7 @@ plotSentCompFraming <- function(studyNum, scoreType, blank = F) {
                              "does that mean...?" = '"Does that mean...?"'))) +
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
-    geom_errorbar(aes(ymin = lowerB, ymax = upperB), # 95% CI
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.9), width = .2, size = .3)
   return(g)
 }
@@ -521,255 +529,137 @@ plotSentFormat <- function(plot, scoreType) {
 
 # --- SUMMARY TABLES ----------------------------------------------------------
 
-# make refactoring function to reorder levels
-refactor <- function(table) {
-  table$ageGroup = factor(table$ageGroup, levels = c("adults", "children"))
-  table$country = factor(table$country, levels = c("us", "india"))
-  table$framing = factor(table$framing, levels = c("does that mean...?", 
-                                                   "do you think...?"))
-  if (grepl("raceEthn2", paste(names(table), collapse = "_"), fixed = T)) {
-    table$raceEthn2 = factor(table$raceEthn2, levels = c("white", "of-color"))
-  }
-  return(table)
-}
+sumGrpsQP <- c("study", "country", "ageGroup", "framing", "respWording", 
+               "factCat", "questionCat")
+
+sumGrpsQPRE <- c(sumGrpsQP, "raceEthn2")
+
+sumGrpsSent <- c(sumGrpsQP, "sent")
+
+sumGrpsSentRE <- c(sumGrpsQP, "sent", "raceEthn2")
 
 # ------ all possible fact-question pairings: RAW SCORES ----------------------
 
-# make summary table by fact-question pair (collapse across race/ethncity)
-sumTableQP <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>% # used for ordering bars in graphs (1 = within)
-  group_by(study, ageGroup, country, framing, respWording,
-           sent, within, factCat, questionCat) %>%
-  summarise(mean = mean(response, na.rm = T),
-            sd = sd(response, na.rm = T),
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableQP
+# make summary table by fact-question pair 
+# (collapse across race/ethnicity)
+sumTableQP <- multi_boot.data.frame(data = d,
+                                    summary_function = "mean",
+                                    column = "response",
+                                    summary_groups = sumGrpsQP,
+                                    statistics_functions = c("ci_lower", 
+                                                             "mean", 
+                                                             "ci_upper"))
 
-# make summary table by fact-question pair (separate by race/ethncity)
-sumTableQPRE <- d %>%
-  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, respWording,
-           sent, within, factCat, questionCat) %>%
-  summarise(mean = mean(response, na.rm = T),
-            sd = sd(response, na.rm = T),
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableQPRE
+# make summary table by fact-question pair 
+# (separate by race/ethncity)
+sumTableQPRE <- multi_boot.data.frame(data = d %>% 
+                                        filter(raceEthn2 != "NA"),
+                                      summary_function = "mean",
+                                      column = "response",
+                                      summary_groups = sumGrpsQPRE,
+                                      statistics_functions = c("ci_lower",
+                                                               "mean",
+                                                               "ci_upper"))
 
 # ------ all possible fact-question pairings: ABSOLUTE VALUES OF SCORES -------
 
-# make summary table by fact-question pair (collapse across race/ethncity)
-sumTableQP_abs <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2),
-         response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, framing, respWording,
-           sent, within, factCat, questionCat) %>%
-  summarise(mean = mean(response_abs, na.rm = T),
-            sd = sd(response_abs, na.rm = T),
-            n = length(response_abs[is.na(response_abs) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableQP_abs
+# make summary table by fact-question pair 
+# (collapse across race/ethnicity)
+sumTableQP_abs <- multi_boot.data.frame(data = d,
+                                    summary_function = "mean",
+                                    column = "response_abs",
+                                    summary_groups = sumGrpsQP,
+                                    statistics_functions = c("ci_lower", 
+                                                             "mean", 
+                                                             "ci_upper"))
 
-# make summary table by fact-question pair (separate by race/ethncity)
-sumTableQPRE_abs <- d %>%
-  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2),
-         response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, respWording,
-           sent, within, factCat, questionCat) %>%
-  summarise(mean = mean(response_abs, na.rm = T),
-            sd = sd(response_abs, na.rm = T),
-            n = length(response_abs[is.na(response_abs) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableQPRE_abs
+# make summary table by fact-question pair 
+# (separate by race/ethncity)
+sumTableQPRE_abs <- multi_boot.data.frame(data = d %>% 
+                                            filter(raceEthn2 != "NA"),
+                                      summary_function = "mean",
+                                      column = "response_abs",
+                                      summary_groups = sumGrpsQPRE,
+                                      statistics_functions = c("ci_lower",
+                                                               "mean",
+                                                               "ci_upper"))
 
 # ------ all possible fact-question pairings: BLANK ---------------------------
 
-# make BLANK summary table by fact-question pair (collapse across race/ethncity)
-sumTableQP_blank <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>%
-  group_by(study, ageGroup, country, framing, respWording,
-           sent, within, factCat, questionCat) %>%
-  summarise(mean = 0,
-            sd = 0,
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableQP_blank
+# make BLANK summary table by fact-question pair 
+# (collapse across race/ethncity)
+sumTableQP_blank <- sumTableQP %>%
+  mutate(ci_lower = 0,
+         mean = 0,
+         ci_upper = 0)
 
-# make BLANK summary table by fact-question pair (separate by race/ethncity)
-sumTableQPRE_blank <- d %>%
-  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, respWording,
-           sent, within, factCat, questionCat) %>%
-  summarise(mean = 0,
-            sd = 0,
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableQPRE_blank
+# make BLANK summary table by fact-question pair 
+# (separate by race/ethncity)
+sumTableQPRE_blank <- sumTableQPRE %>%
+  mutate(ci_lower = 0,
+         mean = 0,
+         ci_upper = 0)
 
 # ------ sentient-only vs. inanimate trials: RAW SCORES -----------------------
 
-# make summary table by sentient-only vs. inanimate trials (collapse across race/ethncity)
-sumTableSent <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-         "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>%
-  group_by(study, ageGroup, country, framing, respWording, sent) %>%
-  summarise(mean = mean(response, na.rm = T),
-            sd = sd(response, na.rm = T),
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableSent
+# make summary table by sentient-only vs. inanimate trials 
+# (collapse across race/ethncity)
+sumTableSent <- multi_boot.data.frame(data = d,
+                                        summary_function = "mean",
+                                        column = "response",
+                                        summary_groups = sumGrpsSent,
+                                        statistics_functions = c("ci_lower", 
+                                                                 "mean", 
+                                                                 "ci_upper"))
 
-# make summary table by fact-question pair (separate by race/ethncity)
-sumTableSentRE <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"), 
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, respWording, sent) %>%
-  summarise(mean = mean(response, na.rm = T),
-            sd = sd(response, na.rm = T),
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableSentRE
+# make summary table by fact-question pair 
+# (separate by race/ethncity)
+sumTableSentRE <- multi_boot.data.frame(data = d,
+                                      summary_function = "mean",
+                                      column = "response",
+                                      summary_groups = sumGrpsSentRE,
+                                      statistics_functions = c("ci_lower", 
+                                                               "mean", 
+                                                               "ci_upper"))
 
 # ------ sentient-only vs. inanimate trials: ABSOLUTE VALUES OF SCORES --------
 
-# make summary table by sentient-only vs. inanimate trials (collapse across race/ethncity)
-sumTableSent_abs <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2),
-         response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, framing, respWording, sent) %>%
-  summarise(mean = mean(response_abs, na.rm = T),
-            sd = sd(response_abs, na.rm = T),
-            n = length(response_abs[is.na(response_abs) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableSent_abs
+# make summary table by sentient-only vs. inanimate trials 
+# (collapse across race/ethncity)
+sumTableSent_abs <- multi_boot.data.frame(data = d,
+                                      summary_function = "mean",
+                                      column = "response_abs",
+                                      summary_groups = sumGrpsSent,
+                                      statistics_functions = c("ci_lower", 
+                                                               "mean", 
+                                                               "ci_upper"))
 
-# make summary table by fact-question pair (separate by race/ethncity)
-sumTableSentRE_abs <- d %>%
-  filter(study != "1prime" & phase == "test" & raceEthn2 != "NA") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2),
-         response_abs = abs(response)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, respWording, sent) %>%
-  summarise(mean = mean(response_abs, na.rm = T),
-            sd = sd(response_abs, na.rm = T),
-            n = length(response_abs[is.na(response_abs) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableSentRE_abs
+# make summary table by fact-question pair 
+# (separate by race/ethncity)
+sumTableSentRE_abs <- multi_boot.data.frame(data = d,
+                                            summary_function = "mean",
+                                            column = "response_abs",
+                                            summary_groups = sumGrpsSentRE,
+                                            statistics_functions = 
+                                              c("ci_lower", 
+                                                "mean", 
+                                                "ci_upper"))
 
-# ------ sentient-only vs. inanimate trials: RAW SCORES -----------------------
+# ------ sentient-only vs. inanimate trials: BLANK ----------------------------
 
-# make summary table by sentient-only vs. inanimate trials (collapse across race/ethncity)
-sumTableSent_blank <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>%
-  group_by(study, ageGroup, country, framing, respWording, sent) %>%
-  summarise(mean = 0,
-            sd = 0,
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableSent_blank
+# make summary table by sentient-only vs. inanimate trials 
+# (collapse across race/ethncity)
+sumTableSent_blank <- sumTableSent %>%
+  mutate(ci_lower = 0,
+         mean = 0,
+         ci_upper = 0)
 
-# make summary table by fact-question pair (separate by race/ethncity)
-sumTableSentRE_blank <- d %>%
-  filter(study != "1prime" & phase == "test") %>%
-  mutate(sent = ifelse(factCat == "phy" | questionCat == "phy",
-                       "inanimate", "sentient-only"),
-         within = ifelse(factCat == questionCat,
-                         1, 2)) %>%
-  group_by(study, ageGroup, country, raceEthn2, framing, respWording, sent) %>%
-  summarise(mean = 0,
-            sd = 0,
-            n = length(response[is.na(response) == F])) %>%
-  mutate(se = sd/sqrt(n),
-         marginError = (qt(1 - (.05/2), df = n - 1)) * se,
-         lowerB = mean - marginError,
-         upperB = mean + marginError) %>%
-  refactor()
-sumTableSentRE_blank
+# make summary table by fact-question pair 
+# (separate by race/ethncity)
+sumTableSentRE_blank <- sumTableSentRE %>%
+  mutate(ci_lower = 0,
+         mean = 0,
+         ci_upper = 0)
 
 # --- PLOTS: BLANK ------------------------------------------------------------
 
@@ -906,17 +796,25 @@ plotSoup <- function(g, studies) {
   g <- g +
     theme(panel.margin = grid::unit(1.5, "lines")) +
     geom_text(data = dLabels,
-             aes(x = -Inf, y = -.5,
-                 label = paste0('"', 
-                                R.utils::capitalize(respWording), 
-                                ' no"')),
-             hjust = -0.25, vjust = 1.5, size = 5.5) +
+             aes(x = -Inf, y = -1.5,
+                 label = '"Really no"'),
+             hjust = -0.25, vjust = -0.5, size = 5.5) +
+    geom_text(data = dLabels,
+              aes(x = -Inf, y = -.5,
+                  label = paste0('"', 
+                                 R.utils::capitalize(respWording), 
+                                 ' no"')),
+              hjust = -0.25, vjust = -0.5, size = 5.5) +
     geom_text(data = dLabels,
               aes(x = Inf, y = .5,
                   label = paste0('"', 
                                  R.utils::capitalize(respWording), 
                                  ' yes"')),
-              hjust = 1.25, vjust = -0.5, size = 5.5) +
+              hjust = 1.25, vjust = 1.5, size = 5.5) +
+    geom_text(data = dLabels,
+              aes(x = Inf, y = 1.5,
+                  label = '"Really yes"'),
+              hjust = 1.25, vjust = 1.5, size = 5.5) +
     geom_hline(yintercept = 0, linetype = 1) +
     geom_hline(yintercept = -1.5, linetype = 3) +
     geom_hline(yintercept = -0.5, linetype = 3) +
