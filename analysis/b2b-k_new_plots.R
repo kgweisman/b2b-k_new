@@ -82,7 +82,13 @@ d <- d %>%
          within = factor(ifelse(factCat == questionCat, 1, 2)), # (1 = within)
          respWording = factor(ifelse(ageGroup == "children", 
                                      "sort of", "maybe")),
-         response_abs = abs(response))
+         response_abs = abs(response)) %>%
+  # reorder levels of faceting variables
+  mutate(framing = factor(framing, levels = c("does that mean...?",
+                                              "do you think...?")),
+         country = factor(country, levels = c("us", "india")),
+         ageGroup = factor(ageGroup, levels = c("adults", " children")),
+         raceEthn2 = factor(raceEthn2, levels = c("white", "of-color")))
 
 # glimpse(d)
 
