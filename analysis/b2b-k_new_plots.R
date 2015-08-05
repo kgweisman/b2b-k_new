@@ -25,7 +25,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
 # - RESPONSE WORDING: "maybe yes/no"
-# - ITEM SET: cb1 (affect: positive/negative valence)
+# - ITEM SET: cb1 (affect: positive\negative valence)
 
 # study 1' (2014-05-23) - SUPPLEMENTAL
 # - EXPERIMENTAL SETTING: mturk
@@ -33,7 +33,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
 # - RESPONSE WORDING: "maybe yes/no"
-# - ITEM SET: cb2 (affect: positive/negative valence & high/low arousal)
+# - ITEM SET: cb2 (affect: positive\negative valence & high/low arousal)
 
 # study 2 (spring 2014 - fall 2014)
 # - EXPERIMENTAL SETTING: university preschool
@@ -41,7 +41,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - AGE GROUP: children
 # - FRAMING: "does that mean...?" 
 # - RESPONSE WORDING: "sort of yes/no"
-# - ITEM SET: cb1 (affect: positive/negative valence)
+# - ITEM SET: cb1 (affect: positive\negative valence)
 
 # study 3 (2014-06-17)
 # - EXPERIMENTAL SETTING: mturk
@@ -49,14 +49,14 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - AGE GROUP: adults
 # - FRAMING: "does that mean...?" 
 # - RESPONSE WORDING: "maybe yes/no"
-# - ITEM SET: cb1 (affect: positive/negative valence)
+# - ITEM SET: cb1 (affect: positive\negative valence)
 
 # study 4a (2014-06-25)
 # - EXPERIMENTAL SETTING: mturk
 # - COUNTRY: us
 # - AGE GROUP: adults
 # - FRAMING: "do you think...?" 
-# - ITEM SET: cb1 (affect: positive/negative valence)
+# - ITEM SET: cb1 (affect: positive\negative valence)
 
 # study 4b (2014-06-25)
 # - EXPERIMENTAL SETTING: mturk
@@ -64,7 +64,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # - AGE GROUP: adults
 # - FRAMING: "do you think...?" 
 # - RESPONSE WORDING: "maybe yes/no"
-# - ITEM SET: cb1 (affect: positive/negative valence)
+# - ITEM SET: cb1 (affect: positive\negative valence)
 
 # --- IMPORTING DATA ----------------------------------------------------------
 
@@ -114,10 +114,12 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
               data = subset(table, 
                             study == studyNum & country == countryName)) +
     geom_bar(aes(fill = questionCat), colour = "black",
-             position = "dodge", stat = "identity") + 
+             position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
     return(g)
 }
 
@@ -140,11 +142,13 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
     facet_grid(ageGroup ~ .,
                labeller = labeller(ageGroup = c("adults" = "US Adults", 
                                                "children" = "US Children"))) +
-    geom_bar(aes(fill = questionCat), colour = "black", 
-             position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black",
+             position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -168,11 +172,13 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
     facet_grid(raceEthn2 ~ .,
                labeller = labeller(raceEthn2 = c("of-color" = "Children of Color", 
                                                "white" = "White Children"))) +
-    geom_bar(aes(fill = questionCat), colour = "black", 
-             position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black",
+             position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -196,11 +202,13 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
     facet_grid(country ~ .,
                labeller = labeller(country = c("india" = "Indian Adults", 
                                                "us" = "US Adults"))) +
-    geom_bar(aes(fill = questionCat), colour = "black", 
-             position = "dodge", stat = "identity") + 
+    geom_bar(aes(fill = questionCat), colour = "black",
+             position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -227,10 +235,12 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
                  framing = c("do you think...?" = '"Do you think...?"',
                              "does that mean...?" = '"Does that mean...?"'))) +
     geom_bar(aes(fill = questionCat), colour = "black",
-             position = "dodge", stat = "identity") + 
+             position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -256,10 +266,12 @@ plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
                  study = c("1" = "US Adults", "2" = "US Children",
                              "3" = "Indian Adults"))) +
     geom_bar(aes(fill = questionCat), colour = "black",
-             position = "dodge", stat = "identity") + 
+             position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -276,9 +288,9 @@ plotQPFormat <- function(plot, scoreType) {
     raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
   }
   if (scoreType == "raw") {
-    ylim = c(-1.75, 1.75)
+    ylim = c(-1.6, 1.6)
   } else if (scoreType == "abs") {
-    ylim = c(0, 1.75)
+    ylim = c(0, 1.6)
   }
   
   # plot
@@ -286,9 +298,10 @@ plotQPFormat <- function(plot, scoreType) {
         coord_cartesian(ylim = ylim) +
         theme_bw() +
         theme(text = element_text(size = 48),
-              axis.text = element_text(size = 36),
               axis.title = element_text(size = 48),
+              axis.text = element_text(size = 36),
               axis.text.x = element_text(size = 48),
+              axis.text.y = element_text(angle = 0, hjust = .5),
               legend.position = "top",
               legend.text = element_text(size = 36),
               legend.title = element_text(size = 36),
@@ -361,10 +374,12 @@ plotSent <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
               data = subset(table,
                             study == studyNum & country == countryName)) +
     geom_bar(colour = "black", fill = "gray", 
-             position = "dodge", stat = "identity") +
+             position = position_dodge(0.7), width = 0.5, stat = "identity") +
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -388,10 +403,12 @@ plotSentCompAge <- function(studyNum, scoreType, blank = F) {
                labeller = labeller(ageGroup = c("adults" = "US Adults", 
                                                 "children" = "US Children"))) +
     geom_bar(colour = "black", fill = "gray", 
-             position = "dodge", stat = "identity") + 
+             position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -416,10 +433,12 @@ plotSentCompRE <- function(studyNum, scoreType, blank = F) {
                                                    "Children of Color", 
                                                  "white" = "White Children"))) +
     geom_bar(colour = "black", fill = "gray", 
-             position = "dodge", stat = "identity") + 
+             position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -443,10 +462,12 @@ plotSentCompCountry <- function(studyNum, scoreType, blank = F) {
                labeller = labeller(country = c("india" = "Indian Adults", 
                                                "us" = "US Adults"))) +
     geom_bar(colour = "black", fill = "gray", 
-             position = "dodge", stat = "identity") + 
+             position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -472,10 +493,12 @@ plotSentCompFraming <- function(studyNum, scoreType, blank = F) {
                  framing = c("do you think...?" = '"Do you think...?"',
                              "does that mean...?" = '"Does that mean...?"'))) +
     geom_bar(colour = "black", fill = "gray", 
-             position = "dodge", stat = "identity") + 
+             position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
+                  position = position_dodge(0.7), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
+                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
   return(g)
 }
 
@@ -492,9 +515,9 @@ plotSentFormat <- function(plot, scoreType) {
     raceEthn2 <- levels(factor(plot$data$raceEthn2)); 
   }
   if (scoreType == "raw") {
-    ylim = c(-1.75, 1.75)
+    ylim = c(-1.6, 1.6)
   } else if (scoreType == "abs") {
-    ylim = c(0, 1.75)
+    ylim = c(0, 1.6)
   }
   
   # plot
@@ -505,6 +528,7 @@ plotSentFormat <- function(plot, scoreType) {
           axis.text = element_text(size = 36),
           axis.title = element_text(size = 48),
           axis.text.x = element_text(size = 48),
+          axis.text.y = element_text(angle = 10),
           legend.position = "top",
           legend.text = element_text(size = 36),
           legend.title = element_text(size = 36),
@@ -811,27 +835,28 @@ plotSoup <- function(g, studies) {
     filter(study %in% studies)
 
   g <- g +
-    theme(panel.margin = grid::unit(1.5, "lines")) +
-    geom_text(data = dLabels,
-             aes(x = -Inf, y = -1.5,
-                 label = '"Really no"'),
-             hjust = -0.25, vjust = -0.5, size = 10) +
-    geom_text(data = dLabels,
-              aes(x = -Inf, y = -.5,
-                  label = paste0('"', 
-                                 R.utils::capitalize(respWording), 
-                                 ' no"')),
-              hjust = -0.25, vjust = -0.5, size = 10) +
-    geom_text(data = dLabels,
-              aes(x = Inf, y = .5,
-                  label = paste0('"', 
-                                 R.utils::capitalize(respWording), 
-                                 ' yes"')),
-              hjust = 1.25, vjust = 1.5, size = 10) +
-    geom_text(data = dLabels,
-              aes(x = Inf, y = 1.5,
-                  label = '"Really yes"'),
-              hjust = 1.25, vjust = 1.5, size = 10) +
+    theme(panel.margin.y = grid::unit(5, "lines"),
+          panel.margin.x = grid::unit(2, "lines")) +
+#     geom_text(data = dLabels,
+#              aes(x = -Inf, y = -1.5,
+#                  label = '"Really No"'),
+#              hjust = -0.25, vjust = -0.5, size = 10) +
+#     geom_text(data = dLabels,
+#               aes(x = -Inf, y = -.5,
+#                   label = paste0('"', 
+#                                  R.utils::capitalize(respWording), 
+#                                  ' no"')),
+#               hjust = -0.25, vjust = -0.5, size = 10) +
+#     geom_text(data = dLabels,
+#               aes(x = Inf, y = .5,
+#                   label = paste0('"', 
+#                                  R.utils::capitalize(respWording), 
+#                                  ' yes"')),
+#               hjust = 1.25, vjust = 1.5, size = 10) +
+#     geom_text(data = dLabels,
+#               aes(x = Inf, y = 1.5,
+#                   label = '"Really Yes"'),
+#               hjust = 1.25, vjust = 1.5, size = 10) +
     geom_hline(yintercept = 0, linetype = 1) +
     geom_hline(yintercept = -1.5, linetype = 3) +
     geom_hline(yintercept = -0.5, linetype = 3) +
@@ -841,21 +866,21 @@ plotSoup <- function(g, studies) {
 }
 
 # figure 1
-png(file="figure_01.png",width=1700,height=2000)
+png(file="figure_01.png",width=1800,height=2000)
 plotSoup(r123, studies = c(1:3))
 dev.off()
 
 # figure 2
-png(file="figure_02.png",width=1700,height=1400)
+png(file="figure_02.png",width=1800,height=1400)
 plotSoup(r2re, studies = 2)
 dev.off()
 
 # figure 3
-png(file="figure_03.png",width=1700,height=1400)
+png(file="figure_03.png",width=1800,height=1400)
 plotSoup(r4all, studies = 4)
 dev.off()
 
 # figure 4
-png(file="figure_04.png",width=2400,height=1400)
+png(file="figure_04.png",width=2540,height=1400)
 plotSoup(r134, studies = c(1,3:4))
 dev.off()
