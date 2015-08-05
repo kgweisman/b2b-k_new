@@ -277,7 +277,10 @@ contrastOrthogonal <- as.matrix(contrastOrthogonal)
 
 # add pair variable to dataset
 d <- d %>%
-  full_join(pairsTable)
+  full_join(pairsTable) %>%
+  # make "does that mean...?" framing the base
+  mutate(framing = factor(framing, levels = c("does that mean...?",
+                                              "do you think...?")))
 
 # --- STUDY 1 -----------------------------------------------------------------
 
@@ -772,3 +775,7 @@ anova(r4.orthAbsCntryFrmSimp, r4.orthAbsCntryFrmAdd,
       r4.orthAbsCntryFrmInt1, r4.orthAbsCntryFrmInt2)
 anova(r4.orthAbsCntryFrmSimp, r4.orthAbsCntryFrmInt2)
 summary(r4.orthAbsCntryFrmSimp)
+
+# # write regression results table to csv
+# temp <- round(summary(r4.orthCntryFrmInt2)$coefficients, 2)
+# write.csv(temp, "./study4_exploratory-regression.csv")
