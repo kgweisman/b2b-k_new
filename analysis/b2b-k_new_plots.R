@@ -71,7 +71,7 @@ setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_ne
 # read in data
 d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv")[-1] # delete observation numbers
 
-# add response wording variable
+# add variables
 d <- d %>%
   filter(study != "1prime" & # remove alternative itemSet
          phase == "test" & # include only test trials
@@ -110,7 +110,8 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3) 
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
     return(g)
 }
 
@@ -136,7 +137,8 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -163,7 +165,8 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -190,7 +193,8 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -219,7 +223,8 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -247,7 +252,8 @@ plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
     geom_bar(aes(fill = questionCat), colour = "black",
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -273,17 +279,17 @@ plotQPFormat <- function(plot, scoreType) {
   g <- plot +
         coord_cartesian(ylim = ylim) +
         theme_bw() +
-        theme(text = element_text(size = 24),
-              axis.text = element_text(size = 18),
-              axis.title = element_text(size = 24),
-              axis.text.x = element_text(size = 24),
+        theme(text = element_text(size = 48),
+              axis.text = element_text(size = 36),
+              axis.title = element_text(size = 48),
+              axis.text.x = element_text(size = 48),
               legend.position = "top",
-              legend.text = element_text(size = 18),
-              legend.title = element_text(size = 18),
-              plot.title = element_text(size = 24),
-              strip.text = element_text(size = 24)) +
+              legend.text = element_text(size = 36),
+              legend.title = element_text(size = 36),
+              plot.title = element_text(size = 48),
+              strip.text = element_text(size = 48)) +
         labs(x = "FACT Category", 
-             y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
+             y = "Mean Rating\n") +
       scale_x_discrete(labels = c("\nAffect", "\nAutonomy", 
                                   "\nPerception", "\nInanimate\nMaterial")) +
 #     scale_fill_grey(name = "QUESTION Category", 
@@ -351,7 +357,8 @@ plotSent <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -377,7 +384,8 @@ plotSentCompAge <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -404,7 +412,8 @@ plotSentCompRE <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -430,7 +439,8 @@ plotSentCompCountry <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -458,7 +468,8 @@ plotSentCompFraming <- function(studyNum, scoreType, blank = F) {
     geom_bar(colour = "black", fill = "gray", 
              position = "dodge", stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
-                  position = position_dodge(0.9), width = .2, size = .3)
+                  position = position_dodge(0.9), width = .2, size = .3) +
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1))
   return(g)
 }
 
@@ -484,17 +495,17 @@ plotSentFormat <- function(plot, scoreType) {
   g <- plot +
     coord_cartesian(ylim = ylim) +
     theme_bw() +
-    theme(text = element_text(size = 24),
-          axis.text = element_text(size = 18),
-          axis.title = element_text(size = 24),
-          axis.text.x = element_text(size = 24),
+    theme(text = element_text(size = 48),
+          axis.text = element_text(size = 36),
+          axis.title = element_text(size = 48),
+          axis.text.x = element_text(size = 48),
           legend.position = "top",
-          legend.text = element_text(size = 18),
-          legend.title = element_text(size = 18),
-          plot.title = element_text(size = 24),
-          strip.text = element_text(size = 24)) +
+          legend.text = element_text(size = 36),
+          legend.title = element_text(size = 36),
+          plot.title = element_text(size = 48),
+          strip.text = element_text(size = 48)) +
     labs(x = "Trial Type", 
-         y = "Mean Rating (-1.5 = Really No, 1.5 = Really Yes)\n") +
+         y = "Mean Rating\n") +
     scale_x_discrete(labels = c("Inanimate", "Sentient-Only")) 
   
   # provide study numbers in title
@@ -798,23 +809,23 @@ plotSoup <- function(g, studies) {
     geom_text(data = dLabels,
              aes(x = -Inf, y = -1.5,
                  label = '"Really no"'),
-             hjust = -0.25, vjust = -0.5, size = 5.5) +
+             hjust = -0.25, vjust = -0.5, size = 10) +
     geom_text(data = dLabels,
               aes(x = -Inf, y = -.5,
                   label = paste0('"', 
                                  R.utils::capitalize(respWording), 
                                  ' no"')),
-              hjust = -0.25, vjust = -0.5, size = 5.5) +
+              hjust = -0.25, vjust = -0.5, size = 10) +
     geom_text(data = dLabels,
               aes(x = Inf, y = .5,
                   label = paste0('"', 
                                  R.utils::capitalize(respWording), 
                                  ' yes"')),
-              hjust = 1.25, vjust = 1.5, size = 5.5) +
+              hjust = 1.25, vjust = 1.5, size = 10) +
     geom_text(data = dLabels,
               aes(x = Inf, y = 1.5,
                   label = '"Really yes"'),
-              hjust = 1.25, vjust = 1.5, size = 5.5) +
+              hjust = 1.25, vjust = 1.5, size = 10) +
     geom_hline(yintercept = 0, linetype = 1) +
     geom_hline(yintercept = -1.5, linetype = 3) +
     geom_hline(yintercept = -0.5, linetype = 3) +
@@ -824,21 +835,21 @@ plotSoup <- function(g, studies) {
 }
 
 # figure 1
-png(file="figure_01.png",width=850,height=1000)
+png(file="figure_01.png",width=1700,height=2000)
 plotSoup(r123, studies = c(1:3))
 dev.off()
 
 # figure 2
-png(file="figure_02.png",width=850,height=700)
+png(file="figure_02.png",width=1700,height=1400)
 plotSoup(r2re, studies = 2)
 dev.off()
 
 # figure 3
-png(file="figure_03.png",width=850,height=700)
+png(file="figure_03.png",width=1700,height=1400)
 plotSoup(r4all, studies = 4)
 dev.off()
 
 # figure 4
-png(file="figure_04.png",width=1200,height=700)
+png(file="figure_04.png",width=2400,height=1400)
 plotSoup(r134, studies = c(1,3:4))
 dev.off()
