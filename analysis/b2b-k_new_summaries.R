@@ -3,11 +3,11 @@
 # NOTE: MUST RUN ANALYSIS FILE FIRST!
 
 # set studies
-studies <- c(1,2)
+studies <- c(2)
 
 # set groups to group by
 # format: groups <- list(~country, ~framing)
-groups <- list(~ageGroup)
+groups <- list(~gender, ~ageCat)
 
 # -- SET UP DATASET with contrasts --------------------------------------------
 dSummaries <- d %>%
@@ -51,9 +51,16 @@ dSummaries <- d %>%
                                           NA))),
          raceEthn2 = factor(raceEthn2, levels = c("white", "of_color")))
 
-if (grepl("raceEthn2", groups) == TRUE) {
+if (TRUE %in% grepl("raceEthn2", groups)) {
   dSummaries <- dSummaries %>%
     filter(raceEthn2 != "NA")
+}
+
+if (TRUE %in% grepl("ageCat", groups)) {
+  dSummaries <- dSummaries %>%
+    mutate(ageCat = ifelse(age == "NA", NA,
+                           ifelse(age < median(age, na.rm = T), "young",
+                                  "old")))
 }
 
 # -- GET MEANS AND DIFFERENCES by grouping variables --------------------------
@@ -166,6 +173,9 @@ if (temp1 == "us") {
 } else if (temp1 == "white") {
   grouping1 <- grouping1 %>%
     mutate(diff = white - of_color)
+} else if (temp1 == "old") {
+  group1 <- grouping1 %>%
+    mutate(diff = old - young)
 }
 
 # grouping variable 2
@@ -190,7 +200,10 @@ if (length(groups) > 1) {
   } else if (temp2 == "white") {
     grouping2 <- grouping2 %>%
       mutate(diff = white - of_color)
-  } 
+  } else if (temp2 == "old") {
+    grouping2 <- grouping2 %>%
+      mutate(diff = old - young)
+  }
 } else {
   rm(temp2, grouping2)
 }
