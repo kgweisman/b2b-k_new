@@ -278,9 +278,16 @@ contrastOrthogonal <- as.matrix(contrastOrthogonal)
 # add pair variable to dataset
 d <- d %>%
   full_join(pairsTable) %>%
-  # make "does that mean...?" framing the base
-  mutate(framing = factor(framing, levels = c("does that mean...?",
+  # make us the base country and "does that mean...?" the base framing
+  mutate(country = factor(country, levels = c("us", "india")),
+         framing = factor(framing, levels = c("does that mean...?",
                                               "do you think...?")))
+
+# try effect-coding country
+contrasts(d$country) <- c(-1, 1)
+
+# try effect-coding framing
+contrasts(d$framing) <- c(-1, 1)
 
 # --- STUDY 1 -----------------------------------------------------------------
 
