@@ -285,6 +285,7 @@ d <- d %>%
 
 # effect-coding of demographic variables
 contrasts(d$ageGroup) <- cbind("children" = c(-1, 1)) # adults = -1, children = 1
+contrasts(d$gender) <- cbind("male" = c(-1, 1)) # female = -1, male = 1
 contrasts(d$raceEthn2) <- cbind("ofColor" = c(1, -1)) # white = -1, of-color = 1
 contrasts(d$country) <- cbind("india" = c(-1, 1)) # us = -1, india = 1
 contrasts(d$framing) <- cbind("opinion" = c(-1, 1)) # logical = -1, opinion = 1
@@ -391,7 +392,7 @@ with(d %>% filter(study == "1prime" & country == "us" & phase == "test") %>%
 
 # comparison to neutral
 contrasts(d$pair) <- contrastNeutral
-r2.neut <- lmer(response ~ -1 + pair + gender + age + (1 | subid), 
+r2.neut <- lmer(response ~ -1 + pair + gender + scale(age, scale = F) + (1 | subid), 
                 subset(d, phase == "test" & study == "2"))
 summary(r2.neut)
 
@@ -400,7 +401,7 @@ minMaxSumReg(r2.neut, "inanimate")
 
 # orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r2.orth <- lmer(response ~ pair + gender + age + (1 | subid), 
+r2.orth <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                 subset(d, phase == "test" & study == "2"))
 summary(r2.orth)
 
@@ -429,13 +430,13 @@ with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
 
 # orthogonal contrasts on absolute values
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r2.orthAbs <- lmer(abs(response) ~ pair + gender + age + (1 | subid), 
+r2.orthAbs <- lmer(abs(response) ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                    subset(d, phase == "test" & study == "2"))
 summary(r2.orthAbs)
 
 # # orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-# r2.orthBin <- glmer(ynResponse ~ pair + gender + age + (1 | subid),
+# r2.orthBin <- glmer(ynResponse ~ pair + gender + scale(age, scale = F) + (1 | subid),
 #                    subset(d, phase == "test" & study == "2"),
 #                    family = "binomial")
 # summary(r2.orthBin)
@@ -445,7 +446,7 @@ contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
                           subset(d, phase == "test" & 
                                    (study == "1" | study == "2")))
-r2.orthAgeGrpAdd <- lmer(response ~ pair + ageGroup + (1 | subid), 
+r2.orthAgeGrpAdd <- lmer(response ~ pair + scale(age, scale = F)Group + (1 | subid), 
                          subset(d, phase == "test" & 
                                   (study == "1" | study == "2")))
 r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid), 
@@ -463,7 +464,7 @@ round(summary(r2.orthAgeGrpInt)$coefficients,2)
 #                           subset(d, phase == "test" & 
 #                                    (study == "1" | study == "2")),
 #                           family = "binomial")
-# r2.orthBinAgeGrpAdd <- glmer(ynResponse ~ pair + ageGroup + (1 | subid), 
+# r2.orthBinAgeGrpAdd <- glmer(ynResponse ~ pair + scale(age, scale = F)Group + (1 | subid), 
 #                              subset(d, phase == "test" & 
 #                                       (study == "1" | study == "2")),
 #                              family = "binomial")
@@ -502,15 +503,15 @@ r2.chisqSequence <- summary(r2.tableSequence); r2.chisqSequence
 
 # race/ethnicity comparison: comparison to neutral
 contrasts(d$pair) <- contrastNeutral
-r2.neutREsimp <- lmer(response ~ pair + gender + age + (1 | subid), 
+r2.neutREsimp <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                       data = subset(d, phase == "test" & 
                                       study == "2" & 
                                       raceEthn2 != "NA"))
-r2.neutREadd <- lmer(response ~ pair + raceEthn2 + gender + age + (1 | subid), 
+r2.neutREadd <- lmer(response ~ pair + raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
-r2.neutREint <- lmer(response ~ pair * raceEthn2 + gender + age + (1 | subid), 
+r2.neutREint <- lmer(response ~ pair * raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
@@ -520,15 +521,15 @@ summary(r2.neutREint)
 
 # race/ethnicity comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r2.orthREsimp <- lmer(response ~ pair + gender + age + (1 | subid), 
+r2.orthREsimp <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
-r2.orthREadd <- lmer(response ~ pair + raceEthn2 + gender + age + (1 | subid), 
+r2.orthREadd <- lmer(response ~ pair + raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
-r2.orthREint <- lmer(response ~ pair * raceEthn2 + gender + age + (1 | subid), 
+r2.orthREint <- lmer(response ~ pair * raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
@@ -540,10 +541,10 @@ round(summary(r2.orthREint)$coefficients,2)
 
 # # race/ethnicity comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-# r2.orthBinREadd <- glmer(ynResponse ~ pair + raceEthn2 + gender + age + (1 | subid), 
+# r2.orthBinREadd <- glmer(ynResponse ~ pair + raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
 #                      subset(d, phase == "test" & study == "2"),
 #                      family = "binomial")
-# r2.orthBinREint <- glmer(ynResponse ~ pair * raceEthn2 + gender + age + (1 | subid), 
+# r2.orthBinREint <- glmer(ynResponse ~ pair * raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
 #                      subset(d, phase == "test" & study == "2"),
 #                      family = "binomial")
 # anova(r2.orth, r2.orthBinREadd, r2.orthBinREint)
