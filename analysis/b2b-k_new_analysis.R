@@ -556,6 +556,24 @@ round(summary(r2.orthREint)$coefficients,2)
 # anova(r2.orth, r2.orthBinREint)
 # summary(r2.orthBinREint)
 
+# more interactions!
+# three-way interactions with gender and age
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r2.orth2way <- lmer(response ~ pair * gender * scale(age, scale = F) 
+                    + (1 | subid), 
+                    subset(d, phase == "test" & study == "2"))
+summary(r2.orth2way)
+round(summary(r2.orth2way)$coefficients, 2)
+
+# four-way interactions with gender, age, and raceEthn2
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r2.orth3way <- lmer(response ~ pair * gender * scale(age, scale = F) 
+                    * raceEthn2 
+                    + (1 | subid), 
+                    subset(d, phase == "test" & study == "2"))
+summary(r2.orth3way)
+round(summary(r2.orth3way)$coefficients, 2)
+
 # --- STUDY 3 -----------------------------------------------------------------
 
 # ------ planned analyses -----------------------------------------------------
