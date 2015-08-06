@@ -284,6 +284,7 @@ d <- d %>%
                                               "do you think...?")))
 
 # effect-coding of demographic variables
+contrasts(d$ageGroup) <- cbind("children" = c(-1, 1)) # adults = -1, children = 1
 contrasts(d$raceEthn2) <- cbind("ofColor" = c(1, -1)) # white = -1, of-color = 1
 contrasts(d$country) <- cbind("india" = c(-1, 1)) # us = -1, india = 1
 contrasts(d$framing) <- cbind("opinion" = c(-1, 1)) # logical = -1, opinion = 1
