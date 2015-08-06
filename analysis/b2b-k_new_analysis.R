@@ -283,12 +283,17 @@ d <- d %>%
          framing = factor(framing, levels = c("does that mean...?",
                                               "do you think...?")))
 
-# effect-coding of demographic variables
-contrasts(d$ageGroup) <- cbind("children" = c(-1, 1)) # adults = -1, children = 1
-contrasts(d$gender) <- cbind("male" = c(-1, 1)) # female = -1, male = 1
-contrasts(d$raceEthn2) <- cbind("ofColor" = c(1, -1)) # white = -1, of-color = 1
-contrasts(d$country) <- cbind("india" = c(-1, 1)) # us = -1, india = 1
-contrasts(d$framing) <- cbind("opinion" = c(-1, 1)) # logical = -1, opinion = 1
+# effect-coding of demographic variables (UGM = unweighted grand mean)
+contrasts(d$ageGroup) <- cbind("children_UGM" = 
+                                 c(-1, 1)) # adults = -1, children = 1
+contrasts(d$gender) <- cbind("male_UGM" = 
+                               c(-1, 1)) # female = -1, male = 1
+contrasts(d$raceEthn2) <- cbind("ofColor_UGM" = 
+                                  c(1, -1)) # white = -1, of-color = 1
+contrasts(d$country) <- cbind("india_UGM" = 
+                                c(-1, 1)) # us = -1, india = 1
+contrasts(d$framing) <- cbind("opinion_UGM" = 
+                                c(-1, 1)) # logical = -1, opinion = 1
 
 # --- STUDY 1 -----------------------------------------------------------------
 
@@ -446,7 +451,7 @@ contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
                           subset(d, phase == "test" & 
                                    (study == "1" | study == "2")))
-r2.orthAgeGrpAdd <- lmer(response ~ pair + scale(age, scale = F)Group + (1 | subid), 
+r2.orthAgeGrpAdd <- lmer(response ~ pair + ageGroup + (1 | subid), 
                          subset(d, phase == "test" & 
                                   (study == "1" | study == "2")))
 r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid), 
@@ -464,7 +469,7 @@ round(summary(r2.orthAgeGrpInt)$coefficients,2)
 #                           subset(d, phase == "test" & 
 #                                    (study == "1" | study == "2")),
 #                           family = "binomial")
-# r2.orthBinAgeGrpAdd <- glmer(ynResponse ~ pair + scale(age, scale = F)Group + (1 | subid), 
+# r2.orthBinAgeGrpAdd <- glmer(ynResponse ~ pair + ageGroup + (1 | subid), 
 #                              subset(d, phase == "test" & 
 #                                       (study == "1" | study == "2")),
 #                              family = "binomial")
