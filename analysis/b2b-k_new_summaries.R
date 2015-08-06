@@ -7,7 +7,7 @@ studies <- c(2)
 
 # set groups to group by
 # format: groups <- list(~country, ~framing)
-groups <- list(~gender, ~ageCat)
+groups <- list(~gender, ~ageCat, ~raceEthn2)
 
 # -- SET UP DATASET with contrasts --------------------------------------------
 dSummaries <- d %>%
@@ -208,6 +208,36 @@ if (length(groups) > 1) {
   rm(temp2, grouping2)
 }
 
+# grouping variable 3
+if (length(groups) > 2) {
+  grouping3 <- dSummaries %>%
+    group_by_(.dots = c(~phase, groups[[3]])) %>% # phase is a dummy
+    summarise(mean = mean(response, na.rm = T)) %>%
+    spread_(substring(groups[[3]], 1)[2], "mean")
+  temp3 <- as.name(names(grouping3)[2])
+  if (temp3 == "us") {
+    grouping3 <- grouping3 %>%
+      mutate(diff = us - india)
+  } else if (temp3 == "adults") {
+    grouping3 <- grouping3 %>%
+      mutate(diff = adults - children)
+  } else if (temp3 == "logical") {
+    grouping3 <- grouping3 %>%
+      mutate(diff = logical - opinion)
+  } else if (temp3 == "female") {
+    grouping3 <- grouping3 %>%
+      mutate(diff = female - male)
+  } else if (temp3 == "white") {
+    grouping3 <- grouping3 %>%
+      mutate(diff = white - of_color)
+  } else if (temp3 == "old") {
+    grouping3 <- grouping3 %>%
+      mutate(diff = old - young)
+  }
+} else {
+  rm(temp3, grouping3)
+}
+
 # -- PRINT ALL ----------------------------------------------------------------
 pairsent.inanim
 pairsnt_within
@@ -225,3 +255,4 @@ pairinan_q_aut.per
 
 grouping1
 grouping2
+grouping3
