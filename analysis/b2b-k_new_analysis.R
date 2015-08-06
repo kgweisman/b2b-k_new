@@ -681,15 +681,15 @@ minMaxSumReg(r4.neutCountryInt, "sentient-only")
 minMaxSumReg(r4.neutCountryInt, "inanimate")
 
 # hand-make minMax for interactions
-interactions <- summary(r4.neutCountryInt)$coefficients[18:32,c(1,3)]
-betaMin <- c(min(interactions[c(1:2, 4:6, 8:10), 1]),
-             min(interactions[c(3, 7, 11:15), 1]))
-betaMax <- c(max(interactions[c(1:2, 4:6, 8:10), 1]),
-             max(interactions[c(3, 7, 11:15), 1]))
-tMin <- c(min(interactions[c(1:2, 4:6, 8:10), 2]),
-             min(interactions[c(3, 7, 11:15), 2]))
-tMax <- c(max(interactions[c(1:2, 4:6, 8:10), 2]),
-             max(interactions[c(3, 7, 11:15), 2]))
+interactions <- summary(r4.neutCountryInt)$coefficients[17:32,c(1,3)] # include countryindia_UGM for aff-aff comparison
+betaMin <- c("sent" = min(interactions[c(1:3, 5:7, 9:11), 1]),
+             "inan" = min(interactions[c(4, 8, 12:16), 1]))
+betaMax <- c("sent" = max(interactions[c(1:3, 5:7, 9:11), 1]),
+             "inan" = max(interactions[c(4, 8, 12:16), 1]))
+tMin <- c("sent" = min(interactions[c(1:3, 5:7, 9:11), 2]),
+          "inan" = min(interactions[c(4, 8, 12:16), 2]))
+tMax <- c("sent" = max(interactions[c(1:3, 5:7, 9:11), 2]),
+          "inan" = max(interactions[c(4, 8, 12:16), 2]))
 minMaxTable <- cbind("beta" = c(betaMin, betaMax),
                "t" = c(tMin, tMax))
 row.names(minMaxTable) = c("sent_min", "inan_min",
