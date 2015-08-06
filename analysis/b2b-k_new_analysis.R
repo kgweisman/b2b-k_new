@@ -741,6 +741,8 @@ anova(r4.orthAbsCountrySimp, r4.orthAbsCountryAdd, r4.orthAbsCountryInt)
 anova(r4.orthAbsCountrySimp, r4.orthAbsCountryInt)
 summary(r4.orthAbsCountryInt)
 
+round(summary(r4.orthAbsCountryInt)$coefficients, 2)
+
 # ------ exploratory analyses -------------------------------------------------
 
 # us/india comparison, framing comparison: orthogonal contrasts
