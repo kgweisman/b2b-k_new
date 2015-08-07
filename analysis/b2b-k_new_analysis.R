@@ -179,14 +179,19 @@ sum_sequenceAssign <- d %>% distinct(subid) %>% group_by(study, country, sequenc
 # print(sum_sequenceAssign)
 
 # duration by study (minutes; adults only)
-sum_duration <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(durationOfTest), sd = sd(durationOfTest), min = min(durationOfTest), minus1sd = m - sd, plus1sd = m + sd, max = max(durationOfTest))
-# print(sum_duration)
-
-# BROKEN FOR STUDY 4 US ADULTS!
+# BROKEN FOR STUDY 4 US ADULTS! probably need to multiply by 60...
+dDuration <- d %>%
+  filter(durationOfTest != "NA") %>%
+  mutate(durationOfTest = ifelse(study == "4" & country == "us",
+                                 durationOfTest * 60,
+                                 durationOfTest))
 
 # get 95% CIs on duration
 # library(langcog)
-# multi_boot.data.frame(subset(d, durationOfTest != "NA"), summary_function = "mean", column = "durationOfTest", summary_groups = c("study", "country"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
+# # ... by country
+# multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
+# # ... overall
+# multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", statistics_functions = c("ci_lower", "mean", "ci_upper"))
 
 # gender by study
 sum_gender <- d %>% distinct(subid) %>% group_by(study, country, gender) %>% summarise(n = length(gender))
