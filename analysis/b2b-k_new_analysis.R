@@ -229,7 +229,7 @@ pairsTable <- data_frame(
 # set up comparisons to neutral (default)
 contrastNeutral <- contrasts(pairsTable$pair)
 
-# set up planned orthogonal contrasts
+# set up planned orthogonal contrasts: [affect] vs. [perception + autonomy]
 contrastOrthogonal <- pairsTable %>%
   mutate(sent.inanim  = ifelse(factCat != "phy" & questionCat != "phy", 7, -9),
          snt_within = ifelse(sent.inanim > 0 & factCat == questionCat, 2,
@@ -286,6 +286,63 @@ row.names(contrastOrthogonal) = pairsTable$pair
 
 contrastOrthogonal <- as.matrix(contrastOrthogonal)
 
+# set up planned orthogonal contrasts: [affect + perception] vs. [autonomy]
+contrastOrthogonal2 <- pairsTable %>%
+  mutate(sent.inanim  = ifelse(factCat != "phy" & questionCat != "phy", 7, -9),
+         snt_within = ifelse(sent.inanim > 0 & factCat == questionCat, 2,
+                             ifelse(sent.inanim > 0, -1, 0)),
+         snt_f_othrs.aut = ifelse(sent.inanim > 0 & factCat == "aut", -2,
+                                  ifelse(sent.inanim > 0, 1, 0)),
+         snt_f_aff.per = ifelse(sent.inanim > 0 & factCat == "aff", 1,
+                                ifelse(sent.inanim > 0 & factCat == "per", 
+                                       -1, 0)),
+         snt_q_othrs.aut = ifelse(sent.inanim > 0 & questionCat == "aut", -2,
+                                  ifelse(sent.inanim > 0, 1, 0)),
+         snt_q_aff.per = ifelse(sent.inanim > 0 & questionCat == "aff", 1,
+                                ifelse(sent.inanim > 0 & questionCat == "per", 
+                                       -1, 0)),
+         inan_phyphy.othrs = ifelse(sent.inanim < 0 &
+                                      factCat == questionCat, 6,
+                                    ifelse(sent.inanim < 0, -1, 0)),
+         inan_f_othrs.aut = ifelse(sent.inanim < 0 & factCat == "aut", -2,
+                                   ifelse(sent.inanim < 0 & factCat != "phy", 
+                                          1, 0)),
+         inan_f_aff.per = ifelse(sent.inanim < 0 & factCat == "aff", 1,
+                                 ifelse(sent.inanim < 0 & factCat == "per", 
+                                        -1, 0)),
+         inan_q_othrs.aut = ifelse(sent.inanim < 0 & 
+                                     factCat == "phy" & questionCat == "aut", -2,
+                                   ifelse(sent.inanim < 0 & 
+                                            factCat == "phy" & questionCat != "phy", 
+                                          1, 0)),
+         inan_q_aff.per = ifelse(sent.inanim < 0 & 
+                                   factCat == "phy" & questionCat == "aff", 1,
+                                 ifelse(sent.inanim < 0 & 
+                                          factCat == "phy" & questionCat == "per", 
+                                        -1, 0))) %>%
+  select(-factCat, -questionCat)
+
+contrastOrthogonal2 <- contrastOrthogonal2[-1]
+row.names(contrastOrthogonal2) = pairsTable$pair
+
+# # test orthogonality
+# # ... for each contrast, do weights sum to 0?
+# colSums(contrastOrthogonal2) == 0
+# 
+# # ... are all dot products 0?
+# numdots = sum(1:(length(contrastOrthogonal2)))
+# dotprods = NULL
+# for(k in 1:numdots){
+#   for(i in 1:(length(contrastOrthogonal2)-1)){
+#     for(j in (i+1):length(contrastOrthogonal2)){
+#       dotprods[k] = sum(contrastOrthogonal2[i] * contrastOrthogonal2[j])    
+#     }
+#   }
+# }
+# dotprods == 0
+
+contrastOrthogonal2 <- as.matrix(contrastOrthogonal2)
+
 # add pair variable to dataset
 d <- d %>%
   full_join(pairsTable) %>%
@@ -320,7 +377,7 @@ minMaxSumReg(r1.neut, "sentient-only")
 minMaxSumReg(r1.neut, "sentient-to-inanimate")
 minMaxSumReg(r1.neut, "inanimate-to-sentient")
 
-# orthogonal contrasts
+# orthogonal contrasts: [affect] vs. [autonomy + perception]
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r1.orth <- lmer(response ~ pair + (1 | subid), 
                 subset(d, phase == "test" & study == "1"))
@@ -350,13 +407,13 @@ with(d %>% filter(study == "1" & country == "us" & phase == "test") %>%
 
 # ------ exploratory analyses -------------------------------------------------
 
-# orthogonal contrasts on absolute values
+# orthogonal contrasts: on absolute values
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r1.orthAbs <- lmer(abs(response) ~ pair + (1 | subid), 
                    subset(d, phase == "test" & study == "1"))
 summary(r1.orthAbs)
 
-# # orthogonal contrasts on binary values
+# # orthogonal contrasts: on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 # r1.orthBin <- glmer(ynResponse ~ pair + (1 | subid),
 #                    subset(d, phase == "test" & study == "1"), 
@@ -377,7 +434,7 @@ minMaxSumReg(r1prime.neut, "sentient-only")
 minMaxSumReg(r1prime.neut, "sentient-to-inanimate")
 minMaxSumReg(r1prime.neut, "inanimate-to-sentient")
 
-# orthogonal contrasts
+# orthogonal contrasts: [affect] vs. [autonomy + perception]
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r1prime.orth <- lmer(response ~ pair + (1 | subid), 
                      subset(d, phase == "test" & study == "1prime"))
@@ -415,7 +472,7 @@ summary(r2.neut)
 minMaxSumReg(r2.neut, "sentient-only")
 minMaxSumReg(r2.neut, "inanimate")
 
-# orthogonal contrasts
+# orthogonal contrasts: [affect] vs. [autonomy + perception]
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r2.orth <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                 subset(d, phase == "test" & study == "2"))
@@ -444,13 +501,13 @@ with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
 
 # ------ exploratory analyses -------------------------------------------------
 
-# orthogonal contrasts on absolute values
+# orthogonal contrasts: on absolute values
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r2.orthAbs <- lmer(abs(response) ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                    subset(d, phase == "test" & study == "2"))
 summary(r2.orthAbs)
 
-# # orthogonal contrasts on binary values
+# # orthogonal contrasts: on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 # r2.orthBin <- glmer(ynResponse ~ pair + gender + scale(age, scale = F) + (1 | subid),
 #                    subset(d, phase == "test" & study == "2"),
@@ -598,7 +655,7 @@ summary(r3.neut)
 minMaxSumReg(r3.neut, "sentient-only")
 minMaxSumReg(r3.neut, "inanimate")
 
-# orthogonal contrasts
+# orthogonal contrasts: [affect] vs. [autonomy + perception]
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r3.orth <- lmer(response ~ pair + (1 | subid), 
                 subset(d, phase == "test" & study == "3"))
@@ -627,13 +684,13 @@ with(d %>% filter(study == "3" & country == "india" & phase == "test") %>%
 
 # ------ exploratory analyses -------------------------------------------------
 
-# orthogonal contrasts on absolute values
+# orthogonal contrasts: on absolute values
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r3.orthAbs <- lmer(abs(response) ~ pair + (1 | subid), 
                    subset(d, phase == "test" & study == "3"))
 summary(r3.orthAbs)
 
-# # orthogonal contrasts on binary values
+# # orthogonal contrasts: on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 # r3.orthBin <- glmer(ynResponse ~ pair + (1 | subid), 
 #                 subset(d, phase == "test" & study == "3"),
