@@ -186,7 +186,31 @@ pairsTable <- data_frame(
          pair = factor(paste(factCat, questionCat, sep = "_")))
 
 # set up comparisons to neutral (default)
-contrastNeutral <- contrasts(pairsTable$pair)
+# contrastNeutral <- contrasts(pairsTable$pair)
+
+contrastNeutral <- pairsTable %>%
+  mutate(aff_aff = c(1, rep(0, 15)),
+         aff_aut = c(0, 1, rep(0, 14)),
+         aff_per = c(rep(0, 2), 1, rep(0, 13)),
+         aff_phy = c(rep(0, 3), 1, rep(0, 12)),
+         aut_aff = c(rep(0, 4), 1, rep(0, 11)),
+         aut_per = c(rep(0, 5), 1, rep(0, 10)),
+         aut_aut = c(rep(0, 6), 1, rep(0, 9)),
+         aut_phy = c(rep(0, 7), 1, rep(0, 8)),
+         per_aff = c(rep(0, 8), 1, rep(0, 7)),
+         per_aut = c(rep(0, 9), 1, rep(0, 6)),
+         per_per = c(rep(0, 10), 1, rep(0, 5)),
+         per_phy = c(rep(0, 11), 1, rep(0, 4)),
+         phy_aff = c(rep(0, 12), 1, rep(0, 3)),
+         phy_aut = c(rep(0, 13), 1, rep(0, 2)),
+         phy_per = c(rep(0, 14), 1, rep(0, 1))
+         # phy_phy = c(rep(0, 15), 1)
+  ) %>%
+  select(-factCat, -questionCat)
+
+contrastNeutral <- contrastNeutral[-1]
+row.names(contrastNeutral) = pairsTable$pair
+contrastNeutral <- as.matrix(contrastNeutral)
 
 # set up planned orthogonal contrasts
 contrastOrthogonal <- pairsTable %>%
@@ -254,14 +278,14 @@ d <- d %>%
 # ------ planned analyses -----------------------------------------------------
 
 # comparison to neutral
-contrasts(d$pair) <- contrastNeutral
-or1.neut <- clmm(responseF ~ -1 + pair + (1 | subid), 
-                subset(d, phase == "test" & study == "1"))
-summary(or1.neut)
-
-minMaxSumReg(or1.neut, "sentient-only")
-minMaxSumReg(or1.neut, "sentient-to-inanimate")
-minMaxSumReg(or1.neut, "inanimate-to-sentient")
+# contrasts(d$pair) <- contrastNeutral
+# or1.neut <- clmm(responseF ~ 0 + pair + (1 | subid), 
+#                 subset(d, phase == "test" & study == "1"))
+# summary(or1.neut)
+# 
+# minMaxSumReg(or1.neut, "sentient-only")
+# minMaxSumReg(or1.neut, "sentient-to-inanimate")
+# minMaxSumReg(or1.neut, "inanimate-to-sentient")
 
 # orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -349,18 +373,18 @@ summary(or1prime.orth)
 
 # ------ planned analyses -----------------------------------------------------
 
-# comparison to neutral
-contrasts(d$pair) <- contrastNeutral
-or2.neut <- clmm(responseF ~ -1 + pair + (1 | subid), 
-                subset(d, phase == "test" & study == "2"))
-summary(or2.neut)
-
-minMaxSumReg(or2.neut, "sentient-only")
-minMaxSumReg(or2.neut, "inanimate")
+# # comparison to neutral
+# contrasts(d$pair) <- contrastNeutral
+# or2.neut <- clmm(responseF ~ -1 + pair + (1 | subid), 
+#                 subset(d, phase == "test" & study == "2"))
+# summary(or2.neut)
+# 
+# minMaxSumReg(or2.neut, "sentient-only")
+# minMaxSumReg(or2.neut, "inanimate")
 
 # orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-or2.orth <- clmm(responseF ~ pair + (1 | subid), 
+or2.orth <- clmm(responseF ~ pair + gender + age + (1 | subid), 
                 subset(d, phase == "test" & study == "2"))
 summary(or2.orth)
 
@@ -461,34 +485,35 @@ or2.tableSequence <- with(d %>%
 or2.chisqSequence <- summary(or2.tableSequence); or2.chisqSequence
 
 # race/ethnicity comparison: comparison to neutral
-contrasts(d$pair) <- contrastNeutral
-or2.neutREsimp <- clmm(responseF ~ pair + (1 | subid), 
-                      data = subset(d, phase == "test" & 
-                                      study == "2" & 
-                                      raceEthn2 != "NA"))
-or2.neutREadd <- clmm(responseF ~ pair + raceEthn2 + (1 | subid), 
-                     data = subset(d, phase == "test" & 
-                                     study == "2" & 
-                                     raceEthn2 != "NA"))
-or2.neutREint <- clmm(responseF ~ pair * raceEthn2 + (1 | subid), 
-                     data = subset(d, phase == "test" & 
-                                     study == "2" & 
-                                     raceEthn2 != "NA"))
-anova(or2.neutREsimp, or2.neutREadd, or2.neutREint)
-anova(or2.neutREsimp, or2.neutREint)
-summary(or2.neutREint)
+# contrasts(d$pair) <- contrastNeutral
+# or2.neutREsimp <- clmm(responseF ~ pair + (1 | subid), 
+#                       data = subset(d, phase == "test" & 
+#                                       study == "2" & 
+#                                       raceEthn2 != "NA"))
+# or2.neutREadd <- clmm(responseF ~ pair + raceEthn2 + (1 | subid), 
+#                      data = subset(d, phase == "test" & 
+#                                      study == "2" & 
+#                                      raceEthn2 != "NA"))
+# or2.neutREint <- clmm(responseF ~ pair * raceEthn2 + (1 | subid), 
+#                      data = subset(d, phase == "test" & 
+#                                      study == "2" & 
+#                                      raceEthn2 != "NA"))
+# anova(or2.neutREsimp, or2.neutREadd, or2.neutREint)
+# anova(or2.neutREsimp, or2.neutREint)
+# summary(or2.neutREint)
 
 # race/ethnicity comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-or2.orthREsimp <- clmm(responseF ~ pair + (1 | subid), 
+contrasts(d$raceEthn2) <- cbind("of-color" = c(1, 0))
+or2.orthREsimp <- clmm(responseF ~ pair + gender + age + (1 | subid), 
                       data = subset(d, phase == "test" & 
                                       study == "2" & 
                                       raceEthn2 != "NA"))
-or2.orthREadd <- clmm(responseF ~ pair + raceEthn2 + (1 | subid), 
+or2.orthREadd <- clmm(responseF ~ pair + raceEthn2 + gender + age + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
-or2.orthREint <- clmm(responseF ~ pair * raceEthn2 + (1 | subid), 
+or2.orthREint <- clmm(responseF ~ pair * raceEthn2 + gender + age + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
                                      raceEthn2 != "NA"))
@@ -515,13 +540,13 @@ round(summary(or2.orthREint)$coefficients,2)
 # ------ planned analyses -----------------------------------------------------
 
 # comparison to neutral
-contrasts(d$pair) <- contrastNeutral
-or3.neut <- clmm(responseF ~ -1 + pair + (1 | subid), 
-                subset(d, phase == "test" & study == "3"))
-summary(or3.neut)
-
-minMaxSumReg(or3.neut, "sentient-only")
-minMaxSumReg(or3.neut, "inanimate")
+# contrasts(d$pair) <- contrastNeutral
+# or3.neut <- clmm(responseF ~ -1 + pair + (1 | subid), 
+#                 subset(d, phase == "test" & study == "3"))
+# summary(or3.neut)
+# 
+# minMaxSumReg(or3.neut, "sentient-only")
+# minMaxSumReg(or3.neut, "inanimate")
 
 # orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -566,22 +591,23 @@ round(summary(or3.orth)$coefficients,2)
 # summary(or3.orthBin)
 
 # us/india comparison: neutral contrasts
-contrasts(d$pair) <- contrastNeutral
-or3.neutCountrySimp <- clmm(responseF ~ pair + (1 | subid), 
-                           subset(d, (phase == "test") & 
-                                    (study == "1" | study == "3")))
-or3.neutCountryAdd <- clmm(responseF ~ pair + country + (1 | subid), 
-                          subset(d, (phase == "test") & 
-                                   (study == "1" | study == "3")))
-or3.neutCountryInt <- clmm(responseF ~ pair * country + (1 | subid), 
-                          subset(d, (phase == "test") & 
-                                   (study == "1" | study == "3")))
-anova(or3.neutCountrySimp, or3.neutCountryAdd, or3.neutCountryInt)
-anova(or3.neutCountrySimp, or3.neutCountryInt)
-summary(or3.neutCountryInt)
+# contrasts(d$pair) <- contrastNeutral
+# or3.neutCountrySimp <- clmm(responseF ~ pair + (1 | subid), 
+#                            subset(d, (phase == "test") & 
+#                                     (study == "1" | study == "3")))
+# or3.neutCountryAdd <- clmm(responseF ~ pair + country + (1 | subid), 
+#                           subset(d, (phase == "test") & 
+#                                    (study == "1" | study == "3")))
+# or3.neutCountryInt <- clmm(responseF ~ pair * country + (1 | subid), 
+#                           subset(d, (phase == "test") & 
+#                                    (study == "1" | study == "3")))
+# anova(or3.neutCountrySimp, or3.neutCountryAdd, or3.neutCountryInt)
+# anova(or3.neutCountrySimp, or3.neutCountryInt)
+# summary(or3.neutCountryInt)
 
 # us/india comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+contrasts(d$country) <- cbind("india" = c(1, 0))
 or3.orthCountrySimp <- clmm(responseF ~ pair + (1 | subid), 
                            subset(d, (phase == "test") & 
                                     (study == "1" | study == "3")))
@@ -620,16 +646,16 @@ round(summary(or3.orthCountryInt)$coefficients,2)
 # ------ planned analyses -----------------------------------------------------
 
 # us/india comparison: comparison to neutral
-contrasts(d$pair) <- contrastNeutral
-or4.neutCountrySimp <- clmm(responseF ~ -1 + pair + (1 | subid), 
-                           subset(d, phase == "test" & study == "4"))
-or4.neutCountryAdd <- clmm(responseF ~ -1 + pair + country + (1 | subid), 
-                          subset(d, phase == "test" & study == "4"))
-or4.neutCountryInt <- clmm(responseF ~ -1 + pair * country + (1 | subid), 
-                          subset(d, phase == "test" & study == "4"))
-anova(or4.neutCountrySimp, or4.neutCountryAdd, or4.neutCountryInt)
-anova(or4.neutCountrySimp, or4.neutCountryInt)
-summary(or4.neutCountryInt)
+# contrasts(d$pair) <- contrastNeutral
+# or4.neutCountrySimp <- clmm(responseF ~ -1 + pair + (1 | subid), 
+#                            subset(d, phase == "test" & study == "4"))
+# or4.neutCountryAdd <- clmm(responseF ~ -1 + pair + country + (1 | subid), 
+#                           subset(d, phase == "test" & study == "4"))
+# or4.neutCountryInt <- clmm(responseF ~ -1 + pair * country + (1 | subid), 
+#                           subset(d, phase == "test" & study == "4"))
+# anova(or4.neutCountrySimp, or4.neutCountryAdd, or4.neutCountryInt)
+# anova(or4.neutCountrySimp, or4.neutCountryInt)
+# summary(or4.neutCountryInt)
 
 # minMaxSumReg(or4.neutCountryInt, "sentient-only")
 # minMaxSumReg(or4.neutCountryInt, "inanimate")
