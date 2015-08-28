@@ -166,6 +166,18 @@ meansPrint <- function(studyNum, countryName = "us", contrast) {
 # read in data
 d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv")[-1] # delete observation numbers
 
+# add in extremeness of response (really vs. maybe/sort of)
+d <- d %>%
+  mutate(
+    extreme = factor(ifelse(grepl("really", responseF), 
+                            "really",
+                            ifelse(grepl("maybe", responseF) | 
+                                     grepl("sort", responseF), 
+                                   "maybe", NA))),
+    sentInam = factor(ifelse(phase == "practice", NA,
+                             ifelse(grepl("phy", pair), "inanimate",
+                                    "sentient-only")))
+    )
 # glimpse(d)
 
 # --- DEMOGRAPHICS ------------------------------------------------------------
@@ -407,12 +419,6 @@ with(d %>% filter(study == "1" & country == "us" & phase == "test") %>%
 
 # ------ exploratory analyses -------------------------------------------------
 
-# orthogonal contrasts: on absolute values
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r1.orthAbs <- lmer(abs(response) ~ pair + (1 | subid), 
-                   subset(d, phase == "test" & study == "1"))
-summary(r1.orthAbs)
-
 # # orthogonal contrasts: on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 # r1.orthBin <- glmer(ynResponse ~ pair + (1 | subid),
@@ -500,12 +506,6 @@ with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
      sd(response, na.rm = T))
 
 # ------ exploratory analyses -------------------------------------------------
-
-# orthogonal contrasts: on absolute values
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r2.orthAbs <- lmer(abs(response) ~ pair + gender + scale(age, scale = F) + (1 | subid), 
-                   subset(d, phase == "test" & study == "2"))
-summary(r2.orthAbs)
 
 # # orthogonal contrasts: on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -684,12 +684,6 @@ with(d %>% filter(study == "3" & country == "india" & phase == "test") %>%
 
 # ------ exploratory analyses -------------------------------------------------
 
-# orthogonal contrasts: on absolute values
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r3.orthAbs <- lmer(abs(response) ~ pair + (1 | subid), 
-                   subset(d, phase == "test" & study == "3"))
-summary(r3.orthAbs)
-
 # # orthogonal contrasts: on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 # r3.orthBin <- glmer(ynResponse ~ pair + (1 | subid), 
@@ -697,37 +691,22 @@ summary(r3.orthAbs)
 #                 family = "binomial")
 # summary(r3.orthBin)
 
-# us/india comparison: neutral contrasts
-contrasts(d$pair) <- contrastNeutral
-r3.neutCountrySimp <- lmer(response ~ pair + (1 | subid), 
-                           subset(d, (phase == "test") & 
-                                    (study == "1" | study == "3")))
-r3.neutCountryAdd <- lmer(response ~ pair + country + (1 | subid), 
-                          subset(d, (phase == "test") & 
-                                   (study == "1" | study == "3")))
-r3.neutCountryInt <- lmer(response ~ pair * country + (1 | subid), 
-                          subset(d, (phase == "test") & 
-                                   (study == "1" | study == "3")))
-anova(r3.neutCountrySimp, r3.neutCountryAdd, r3.neutCountryInt)
-anova(r3.neutCountrySimp, r3.neutCountryInt)
-summary(r3.neutCountryInt)
-
-# us/india comparison: orthogonal contrasts
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r3.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
-                          subset(d, (phase == "test") & 
-                                   (study == "1" | study == "3")))
-r3.orthCountryAdd <- lmer(response ~ pair + country + (1 | subid), 
-                          subset(d, (phase == "test") & 
-                                   (study == "1" | study == "3")))
-r3.orthCountryInt <- lmer(response ~ pair * country + (1 | subid), 
-                          subset(d, (phase == "test") & 
-                                   (study == "1" | study == "3")))
-anova(r3.orthCountrySimp, r3.orthCountryAdd, r3.orthCountryInt)
-anova(r3.orthCountrySimp, r3.orthCountryInt)
-summary(r3.orthCountryInt)
-
-round(summary(r3.orthCountryInt)$coefficients,2)
+# # us/india comparison: orthogonal contrasts
+# contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+# r3.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
+#                           subset(d, (phase == "test") & 
+#                                    (study == "1" | study == "3")))
+# r3.orthCountryAdd <- lmer(response ~ pair + country + (1 | subid), 
+#                           subset(d, (phase == "test") & 
+#                                    (study == "1" | study == "3")))
+# r3.orthCountryInt <- lmer(response ~ pair * country + (1 | subid), 
+#                           subset(d, (phase == "test") & 
+#                                    (study == "1" | study == "3")))
+# anova(r3.orthCountrySimp, r3.orthCountryAdd, r3.orthCountryInt)
+# anova(r3.orthCountrySimp, r3.orthCountryInt)
+# summary(r3.orthCountryInt)
+# 
+# round(summary(r3.orthCountryInt)$coefficients,2)
 
 # # us/india comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -815,20 +794,6 @@ meansPrint("4", contrast = "snt_within.between")
 #        filter(factCat == "aff" & questionCat == "aff"), 
 #      sd(response, na.rm = T))
 
-# us/india comparison: orthogonal contrasts on absolute values
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r4.orthAbsCountrySimp <- lmer(abs(response) ~ pair + (1 | subid), 
-                           subset(d, phase == "test" & study == "4"))
-r4.orthAbsCountryAdd <- lmer(abs(response) ~ pair + country + (1 | subid), 
-                          subset(d, phase == "test" & study == "4"))
-r4.orthAbsCountryInt <- lmer(abs(response) ~ pair * country + (1 | subid), 
-                          subset(d, phase == "test" & study == "4"))
-anova(r4.orthAbsCountrySimp, r4.orthAbsCountryAdd, r4.orthAbsCountryInt)
-anova(r4.orthAbsCountrySimp, r4.orthAbsCountryInt)
-summary(r4.orthAbsCountryInt)
-
-round(summary(r4.orthAbsCountryInt)$coefficients, 2)
-
 # ------ exploratory analyses -------------------------------------------------
 
 # us/india comparison, framing comparison: orthogonal contrasts
@@ -852,30 +817,6 @@ anova(r4.orthCntryFrmSimp, r4.orthCntryFrmInt2)
 summary(r4.orthCntryFrmInt2)
 
 round(summary(r4.orthCntryFrmInt2)$coefficients, 2)
-
-# us/india comparison, framing comparison: orthogonal contrasts on absolute values
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r4.orthAbsCntryFrmSimp <- lmer(abs(response) ~ pair * country 
-                               + (1 | subid), 
-                            subset(d, phase == "test" & 
-                                     study != "2" & study != "1prime"))
-r4.orthAbsCntryFrmAdd <- lmer(abs(response) ~ pair * country + framing 
-                              + (1 | subid), 
-                           subset(d, phase == "test" 
-                                  & study != "2" & study != "1prime"))
-r4.orthAbsCntryFrmInt1 <- lmer(abs(response) ~ pair * country + 
-                              framing + country:framing 
-                              + (1 | subid), 
-                            subset(d, phase == "test" & 
-                                     study != "2" & study != "1prime"))
-r4.orthAbsCntryFrmInt2 <- lmer(abs(response) ~ pair * country * framing 
-                               + (1 | subid), 
-                            subset(d, phase == "test" & 
-                                     study != "2" & study != "1prime"))
-anova(r4.orthAbsCntryFrmSimp, r4.orthAbsCntryFrmAdd, 
-      r4.orthAbsCntryFrmInt1, r4.orthAbsCntryFrmInt2)
-anova(r4.orthAbsCntryFrmSimp, r4.orthAbsCntryFrmInt2)
-summary(r4.orthAbsCntryFrmSimp)
 
 # # write regression results table to csv
 # temp <- round(summary(r4.orthCntryFrmInt2)$coefficients, 2)
