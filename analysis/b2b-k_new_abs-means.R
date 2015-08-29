@@ -203,43 +203,68 @@ withinSubj <- d %>%
          inanimate_abs = abs(inanimate),
          sentientOnly_abs = abs(sentientOnly),
          diff_abs = inanimate_abs - sentientOnly_abs)
-withinSubj
+# View(withinSubj)
 
 # study 1: us adults
-with(subset(withinSubj, study == 1), 
-     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+# ... true values
+t1 <- with(subset(withinSubj, study == 1), 
+           t.test(sentientOnly, inanimate, paired = T))
+# ... absolute values
+t1a <- with(subset(withinSubj, study == 1),
+            t.test(sentientOnly_abs, inanimate_abs, paired = T))
 
 # study 2: us children
-with(subset(withinSubj, study == 2), 
-     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+# ... true values
+t2 <- with(subset(withinSubj, study == 2), 
+           t.test(sentientOnly, inanimate, paired = T))
+# ... absolute values
+t2a <- with(subset(withinSubj, study == 2),
+            t.test(sentientOnly_abs, inanimate_abs, paired = T))
 
 # studies 1 & 2: compare us adults & us children
-with(subset(withinSubj, study == 1 | study == 2), 
-     t.test(diff_abs ~ ageGroup))
+t2a_ageGroup <- with(subset(withinSubj, study == 1 | study == 2), 
+                     t.test(diff_abs ~ ageGroup))
 
 # study 2: compare white children & children of color
-with(subset(withinSubj, study == 2), 
-     t.test(diff_abs ~ raceEthn2))
+t2a_raceEthn2 <- with(subset(withinSubj, study == 1 | study == 2), 
+                      t.test(diff_abs ~ raceEthn2))
 
 # study 3: indian adults
-with(subset(withinSubj, study == 3), 
-     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+# ... true values
+t3 <- with(subset(withinSubj, study == 3), 
+           t.test(sentientOnly, inanimate, paired = T))
+# ... absolute values
+t3a <- with(subset(withinSubj, study == 3),
+            t.test(sentientOnly_abs, inanimate_abs, paired = T))
 
 # studies 1 & 3: compare us adults & indian adults
-with(subset(withinSubj, study == 1 | study == 3), 
-     t.test(diff_abs ~ country))
+t3a_country <- with(subset(withinSubj, study == 1 | study == 3), 
+                    t.test(diff_abs ~ country))
 
 # study 4: us adults
-with(subset(withinSubj, study == 4 & country == "us"), 
-     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+# ... true values
+t4us <- with(subset(withinSubj, study == 4 & country == "us"), 
+           t.test(sentientOnly, inanimate, paired = T))
+# ... absolute values
+t4usa <- with(subset(withinSubj, study == 4 & country == "us"),
+            t.test(sentientOnly_abs, inanimate_abs, paired = T))
 
 # study 4: indian adults
-with(subset(withinSubj, study == 4 & country == "india"), 
-     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+# ... true values
+t4india <- with(subset(withinSubj, study == 4 & country == "india"), 
+             t.test(sentientOnly, inanimate, paired = T))
+# ... absolute values
+t4indiaa <- with(subset(withinSubj, study == 4 & country == "india"),
+              t.test(sentientOnly_abs, inanimate_abs, paired = T))
 
 # study 4: compare us adults & indian adults
-with(subset(withinSubj, study == 4), 
-     t.test(diff_abs ~ country))
+# ... true values
+t4_country <- with(subset(withinSubj, study == 4), 
+                   t.test(diff ~ country))
+
+# ... true values
+t4a_country <- with(subset(withinSubj, study == 4), 
+                    t.test(diff_abs ~ country))
 
 # --- [additional option #1] T-TESTS OF ABS VALUES OF MEANS -------------------
 
@@ -409,5 +434,3 @@ summary(r4b)
 # summary(r1)
 # cohensD_inan <- (summary(r1)$coefficients[1,3]*2)/sqrt(summary(r1)$df[2])
 # cohensD_sent <- (summary(r1)$coefficients[2,3]*2)/sqrt(summary(r1)$df[2])
-
-
