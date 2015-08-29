@@ -1,3 +1,196 @@
+# --- PRELIMINARIES -----------------------------------------------------------
+
+# libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+library(stats)
+library(stringr)
+library(lubridate)
+
+# clear environment
+rm(list=ls())
+
+# set working directory
+setwd("/Users/kweisman/Documents/Research (Stanford)/Projects/B2B-K_new/b2b-k_new/")
+
+# make funtion to print out min and max for beta and t by trial type
+minMaxSumReg <- function(regSummary, trialType = "all") {
+  if (trialType == "sentient-only") {
+    range <- c(1:3, 5:7, 9:11)
+  } else if (trialType == "inanimate") {
+    range <- c(4, 8, 12, 13:16)
+  } else if (trialType == "sentient-to-inanimate") {
+    range <- c(4, 8, 12)
+  } else if (trialType == "inanimate-to-sentient") {
+    range <- c(13:15)
+  } else {
+    range <- c(1:16)
+  }
+  
+  # sentient-only trials
+  betaMin <- min(summary(regSummary)$coefficients[range, 1])
+  betaMax <- max(summary(regSummary)$coefficients[range, 1])
+  tMin <- min(summary(regSummary)$coefficients[range, 3])
+  tMax <- max(summary(regSummary)$coefficients[range, 3])
+  
+  # print out table
+  table <- cbind("beta" = c(betaMin, betaMax),
+                 "t" = c(tMin, tMax))
+  row.names(table) = c("min", "max")
+  return(round(table, 2))
+}
+
+# make function to print out means by trial type
+meansPrint <- function(studyNum, countryName = "us", contrast) {
+  temp <- d %>% filter(study == studyNum &
+                         country == countryName &
+                         phase == "test")
+  sent <- temp %>% filter(grepl("phy", pair) == F)
+  inan <- temp %>% filter(grepl("phy", pair) == T)
+  within <- sent %>% filter(factCat == questionCat)
+  between <- sent %>% filter(factCat != questionCat)
+  snt_f_aff <- sent %>% filter(factCat == "aff")
+  snt_f_others <- sent %>% filter(factCat != "aff")
+  snt_f_aut <- sent %>% filter(factCat == "aut")
+  snt_f_per <- sent %>% filter(factCat == "per")
+  snt_q_aff <- sent %>% filter(questionCat == "aff")
+  snt_q_others <- sent %>% filter(questionCat != "aff")
+  snt_q_aut <- sent %>% filter(questionCat == "aut")
+  snt_q_per <- sent %>% filter(questionCat == "per")
+  inan_f_aff <- inan %>% filter(factCat == "aff")
+  inan_f_others <- inan %>% filter(factCat != "aff")
+  inan_f_aut <- inan %>% filter(factCat == "aut")
+  inan_f_per <- inan %>% filter(factCat == "per")
+  inan_q_aff <- inan %>% filter(questionCat == "aff")
+  inan_q_others <- inan %>% filter(questionCat != "aff")
+  inan_q_aut <- inan %>% filter(questionCat == "aut")
+  inan_q_per <- inan %>% filter(questionCat == "per")
+  inan_phyphy <- inan %>% filter(factCat == questionCat)
+  inan_others <- inan %>% filter(factCat != questionCat)
+  
+  if (contrast == "sent.inanim") {
+    c1 <- sent
+    c2 <- inan
+  } else if (contrast == "snt_within.between") {
+    c1 <- within
+    c2 <- between
+  } else if (contrast == "snt_f_aff.othrs") {
+    c1 <- snt_f_aff
+    c2 <- snt_f_others
+  } else if (contrast == "snt_f_aut.per") {
+    c1 <- snt_f_aut
+    c2 <- snt_f_per
+  } else if (contrast == "snt_q_aff.othrs") {
+    c1 <- snt_q_aut
+    c2 <- snt_q_others
+  } else if (contrast == "snt_q_auth.per") {
+    c1 <- snt_q_aut
+    c2 <- snt_q_per
+  } else if (contrast == "inan_f_aff.othrs") {
+    c1 <- inan_f_aff
+    c2 <- inan_f_others
+  } else if (contrast == "inan_f_aut.per") {
+    c1 <- inan_f_aut
+    c2 <- inan_f_per
+  } else if (contrast == "inan_q_aff.othrs") {
+    c1 <- inan_q_aff
+    c2 <- inan_q_others
+  } else if (contrast == "inan_q_aut.per") {
+    c1 <- inan_q_aut
+    c2 <- inan_q_per
+  } else if (contrast == "inan_phyphy.othrs") {
+    c1 <- inan_phyphy
+    c2 <- inan_others
+  }
+  
+  c1m <- with(c1, mean(response, na.rm = T))
+  c1sd <- with(c1, sd(response, na.rm = T))
+  c2m <- with(c2, mean(response, na.rm = T))
+  c2sd <- with(c2, sd(response, na.rm = T))
+  
+  # print out table
+  table <- rbind("c1" = c(c1m, c1sd),
+                 "c2" = c(c2m, c2sd))
+  colnames(table) = c("mean", "sd")
+  return(list("contrast" = contrast, "summaryStats" = round(table, 2)))
+}
+
+# --- STUDY KEY ---------------------------------------------------------------
+
+# study 1 (2014-04-10)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: us
+# - AGE GROUP: adults
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 1' (2014-05-23) - SUPPLEMENTAL
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: us
+# - AGE GROUP: adults
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb2 (affect: positive/negative valence & high/low arousal)
+
+# study 2 (spring 2014 - fall 2014)
+# - EXPERIMENTAL SETTING: university preschool
+# - COUNTRY: us
+# - AGE GROUP: children
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 3 (2014-06-17)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: india
+# - AGE GROUP: adults
+# - FRAMING: "does that mean...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 4a (2014-06-25)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: us
+# - AGE GROUP: adults
+# - FRAMING: "do you think...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# study 4b (2014-06-25)
+# - EXPERIMENTAL SETTING: mturk
+# - COUNTRY: india
+# - AGE GROUP: adults
+# - FRAMING: "do you think...?" 
+# - ITEM SET: cb1 (affect: positive/negative valence)
+
+# --- IMPORTING DATA ----------------------------------------------------------
+
+# read in data
+d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv")[-1] # delete observation numbers
+
+# set up table of all fact-question pairings (16)
+pairsTable <- data_frame(
+  factCat = sort(rep(levels(d$factCat), 4)),
+  questionCat = rep(levels(d$questionCat), 4)) %>%
+  mutate(factCat = factor(factCat),
+         questionCat = factor(questionCat),
+         pair = factor(paste(factCat, questionCat, sep = "_")))
+
+# add pair and sentient vs. inanimate variables to dataset
+d <- d %>%
+  full_join(pairsTable) %>%
+  # make us the base country and "does that mean...?" the base framing
+  mutate(country = factor(country, levels = c("us", "india")),
+         framing = factor(framing, levels = c("does that mean...?",
+                                              "do you think...?")),
+         sentInam = ifelse(phase == "test",
+                           ifelse(grepl("phy", pair),
+                                  "inanimate",
+                                  "sentient-only"),
+                           NA))
+
+# glimpse(d)
+
+# --- T-TESTS OF ABSOLUTE VALUES OF MEANS -------------------------------------
+
 # write function to test whether the mean response to inanimate trials (overall) 
 # is further from the midpoint (0) the mean response to sentient-only trials
 # (overall); NOTE: m1 = inanimate, m2 = sentient-only
@@ -46,11 +239,13 @@ compAbsMean <- function(studyNum, var.equal = "test") {
               "Test of Absolute Values of Means" = results))
 }
     
+compAbsMean(studyNum = 1)
 compAbsMean(studyNum = 1, var.equal = F)
 compAbsMean(studyNum = 2)
 compAbsMean(studyNum = 3)
 compAbsMean(studyNum = 4)
 
+# --- T-TESTS OF ABSOLUTE VALUES OF MEANS: COMPARING EFFECT SIZES -------------
 
 compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
   # make summary table for this study
@@ -84,7 +279,7 @@ compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
     s.pool.india <- sqrt(((n1.india - 1)*s1.india^2 + (n2.india - 1)*s2.india^2)/(n1.india + n2.india - 2))
     t.india <- (m1.india - m2.india) / sqrt(s1.india^2/n1.india + s2.india^2/n2.india)
     df.india <- (s1.india^2/n1.india + s2.india^2/n2.india)^2 / ((s1.india^2/n1.india)^2/(n1.india-1) + (s2.india^2/n2.india)^2/(n2.india-1))
-    p.india <- pt(t.india, df.india, lower.tail = ifelse(t < 0, T, F))
+    p.india <- pt(t.india, df.india, lower.tail = ifelse(t.india < 0, T, F))
     d.india <- (m1.india - m2.india)/s.pool.india
     results.india <- c("Welch's t" = round(t.india, 2), df = round(df.india, 2), 
                  p = round(p.india, 4), "Cohen's d" = round(d.india, 2))
@@ -93,7 +288,7 @@ compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
     s.pool.us <- sqrt(((n1.us - 1)*s1.us^2 + (n2.us - 1)*s2.us^2)/(n1.us + n2.us - 2))
     t.us <- (m1.us - m2.us) / sqrt(s1.us^2/n1.us + s2.us^2/n2.us)
     df.us <- (s1.us^2/n1.us + s2.us^2/n2.us)^2 / ((s1.us^2/n1.us)^2/(n1.us-1) + (s2.us^2/n2.us)^2/(n2.us-1))
-    p.us <- pt(t.us, df.us, lower.tail = ifelse(t < 0, T, F))
+    p.us <- pt(t.us, df.us, lower.tail = ifelse(t.us < 0, T, F))
     d.us <- (m1.us - m2.us)/s.pool.us
     results.us <- c("Welch's t" = round(t.us, 2), df = round(df.us, 2), 
                        p = round(p.us, 4), "Cohen's d" = round(d.us, 2))
@@ -104,7 +299,7 @@ compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
     s.pool.india <- sqrt(((n1.india - 1)*s1^2 + (n2.india - 1)*s2^2)/(n1.india + n2.india - 2))
     t.india <- (m1.india - m2.india) / (s.pool * sqrt((1/n1.india) + (1/n2.india)))
     df.india <- n1.india + n2.india - 2
-    p.india <- pt(t.india, df.india, lower.tail = ifelse(t < 0, t.india, F))
+    p.india <- pt(t.india, df.india, lower.tail = ifelse(t.india < 0, t.india, F))
     d.india <- (m1.india - m2.india)/s.pool.india
     results.india <- c(t = round(t.india, 2), df = round(df.india, 2), 
                  p = round(p.india, 4), "Cohen's d" = round(d.india, 2))
@@ -113,7 +308,7 @@ compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
     s.pool.us <- sqrt(((n1.us - 1)*s1^2 + (n2.us - 1)*s2^2)/(n1.us + n2.us - 2))
     t.us <- (m1.us - m2.us) / (s.pool * sqrt((1/n1.us) + (1/n2.us)))
     df.us <- n1.us + n2.us - 2
-    p.us <- pt(t.us, df.us, lower.tail = ifelse(t < 0, t.us, F))
+    p.us <- pt(t.us, df.us, lower.tail = ifelse(t.us < 0, t.us, F))
     d.us <- (m1.us - m2.us)/s.pool.us
     results.us <- c(t = round(t.us, 2), df = round(df.us, 2), 
                        p = round(p.us, 4), "Cohen's d" = round(d.us, 2))

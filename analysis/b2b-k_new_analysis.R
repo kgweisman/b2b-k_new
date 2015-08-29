@@ -166,18 +166,22 @@ meansPrint <- function(studyNum, countryName = "us", contrast) {
 # read in data
 d = read.csv("./data/anonymized/b2b-k_adults-data_anonymized-and-randomized.csv")[-1] # delete observation numbers
 
-# add in extremeness of response (really vs. maybe/sort of)
+# set up table of all fact-question pairings (16)
+pairsTable <- data_frame(
+  factCat = sort(rep(levels(d$factCat), 4)),
+  questionCat = rep(levels(d$questionCat), 4)) %>%
+  mutate(factCat = factor(factCat),
+         questionCat = factor(questionCat),
+         pair = factor(paste(factCat, questionCat, sep = "_")))
+
+# add pair variable to dataset
 d <- d %>%
-  mutate(
-    extreme = factor(ifelse(grepl("really", responseF), 
-                            "really",
-                            ifelse(grepl("maybe", responseF) | 
-                                     grepl("sort", responseF), 
-                                   "maybe", NA))),
-    sentInam = factor(ifelse(phase == "practice", NA,
-                             ifelse(grepl("phy", pair), "inanimate",
-                                    "sentient-only")))
-    )
+  full_join(pairsTable) %>%
+  # make us the base country and "does that mean...?" the base framing
+  mutate(country = factor(country, levels = c("us", "india")),
+         framing = factor(framing, levels = c("does that mean...?",
+                                              "do you think...?")))
+
 # glimpse(d)
 
 # --- DEMOGRAPHICS ------------------------------------------------------------
@@ -229,14 +233,6 @@ sum_religion <- d %>% distinct(subid) %>% group_by(study, country, religion) %>%
 # print(sum_religion)
 
 # --- CONTRASTS ---------------------------------------------------------------
-
-# set up table of all fact-question pairings (16)
-pairsTable <- data_frame(
-  factCat = sort(rep(levels(d$factCat), 4)),
-  questionCat = rep(levels(d$questionCat), 4)) %>%
-  mutate(factCat = factor(factCat),
-         questionCat = factor(questionCat),
-         pair = factor(paste(factCat, questionCat, sep = "_")))
 
 # set up comparisons to neutral (default)
 contrastNeutral <- contrasts(pairsTable$pair)
@@ -354,14 +350,6 @@ row.names(contrastOrthogonal2) = pairsTable$pair
 # dotprods == 0
 
 contrastOrthogonal2 <- as.matrix(contrastOrthogonal2)
-
-# add pair variable to dataset
-d <- d %>%
-  full_join(pairsTable) %>%
-  # make us the base country and "does that mean...?" the base framing
-  mutate(country = factor(country, levels = c("us", "india")),
-         framing = factor(framing, levels = c("does that mean...?",
-                                              "do you think...?")))
 
 # effect-coding of demographic variables (UGM = unweighted grand mean)
 contrasts(d$ageGroup) <- cbind("children_UGM" = 
