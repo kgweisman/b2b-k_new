@@ -8,8 +8,6 @@ library(lme4)
 library(stats)
 library(stringr)
 library(lubridate)
-library(gridExtra)
-library(modeest)
 
 # clear environment
 rm(list=ls())
@@ -176,6 +174,7 @@ pairsTable <- data_frame(
          questionCat = factor(questionCat),
          pair = factor(paste(factCat, questionCat, sep = "_")))
 
+# add pair variable to dataset
 # add pair and sentient vs. inanimate variables to dataset
 d <- d %>%
   full_join(pairsTable) %>%
@@ -183,13 +182,192 @@ d <- d %>%
   mutate(country = factor(country, levels = c("us", "india")),
          framing = factor(framing, levels = c("does that mean...?",
                                               "do you think...?")),
-         sentInan = ifelse(phase == "test",
-                           ifelse(grepl("phy", pair),
-                                  "inanimate",
-                                  "sentient-only"),
-                           NA))
+         sentInan = factor(ifelse(phase == "test",
+                                  ifelse(grepl("phy", pair),
+                                         "inanimate",
+                                         "sentient-only"),
+                                  NA)))
 
 # glimpse(d)
+
+# --- DEMOGRAPHICS ------------------------------------------------------------
+
+# sample size by study
+sum_sampleSize <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(n = length(subid))
+# print(sum_sampleSize)
+
+# sequence assignment by study
+sum_sequenceAssign <- d %>% distinct(subid) %>% group_by(study, country, sequence) %>% summarise(n = length(subid))
+# print(sum_sequenceAssign)
+
+# duration by study (minutes; adults only)
+# BROKEN FOR STUDY 4 US ADULTS! probably need to multiply by 60...
+dDuration <- d %>%
+  filter(durationOfTest != "NA") %>%
+  mutate(durationOfTest = ifelse(study == "4" & country == "us",
+                                 durationOfTest * 60,
+                                 durationOfTest))
+
+# get 95% CIs on duration
+# library(langcog)
+# # ... by country
+# multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
+# # ... overall
+# multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", statistics_functions = c("ci_lower", "mean", "ci_upper"))
+
+# gender by study
+sum_gender <- d %>% distinct(subid) %>% group_by(study, country, gender) %>% summarise(n = length(gender))
+# print(sum_gender)
+
+# age by study (years; children only)
+sum_age <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(age), sd = sd(age), min = min(age), max = max(age))
+# print(sum_age)
+
+# race/ethnicity by study
+# ... finest grain
+sum_raceEthn4 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn4) %>% summarise(n = length(raceEthn4))
+# print(sum_raceEthn4)
+# ... white-only/some-eastern/other
+sum_raceEthn3 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn3) %>% summarise(n = length(raceEthn3))
+# print(sum_raceEthn3)
+# ... coarsest grain
+sum_raceEthn2 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn2) %>% summarise(n = length(raceEthn2))
+# print(sum_raceEthn2)
+
+# religion by study (study 4 only)
+sum_religion <- d %>% distinct(subid) %>% group_by(study, country, religion) %>% summarise(n = length(religion))
+# print(sum_religion)
+
+# --- CONTRASTS ---------------------------------------------------------------
+
+# set up comparisons to neutral (default)
+contrastNeutral <- contrasts(pairsTable$pair)
+
+# set up planned orthogonal contrasts: [affect] vs. [perception + autonomy]
+contrastOrthogonal <- pairsTable %>%
+  mutate(sent.inanim  = ifelse(factCat != "phy" & questionCat != "phy", 7, -9),
+         snt_within = ifelse(sent.inanim > 0 & factCat == questionCat, 2,
+                             ifelse(sent.inanim > 0, -1, 0)),
+         snt_f_aff.othrs = ifelse(sent.inanim > 0 & factCat == "aff", 2,
+                                  ifelse(sent.inanim > 0, -1, 0)),
+         snt_f_aut.per = ifelse(sent.inanim > 0 & factCat == "aut", 1,
+                                ifelse(sent.inanim > 0 & factCat == "per", 
+                                       -1, 0)),
+         snt_q_aff.othrs = ifelse(sent.inanim > 0 & questionCat == "aff", 2,
+                                  ifelse(sent.inanim > 0, -1, 0)),
+         snt_q_aut.per = ifelse(sent.inanim > 0 & questionCat == "aut", 1,
+                                ifelse(sent.inanim > 0 & questionCat == "per", 
+                                       -1, 0)),
+         inan_phyphy.othrs = ifelse(sent.inanim < 0 &
+                                      factCat == questionCat, 6,
+                                    ifelse(sent.inanim < 0, -1, 0)),
+         inan_f_aff.othrs = ifelse(sent.inanim < 0 & factCat == "aff", 2,
+                                   ifelse(sent.inanim < 0 & factCat != "phy", 
+                                          -1, 0)),
+         inan_f_aut.per = ifelse(sent.inanim < 0 & factCat == "aut", 1,
+                                 ifelse(sent.inanim < 0 & factCat == "per", 
+                                        -1, 0)),
+         inan_q_aff.othrs = ifelse(sent.inanim < 0 & 
+                                     factCat == "phy" & questionCat == "aff", 2,
+                                   ifelse(sent.inanim < 0 & 
+                                            factCat == "phy" & questionCat != "phy", 
+                                          -1, 0)),
+         inan_q_aut.per = ifelse(sent.inanim < 0 & 
+                                   factCat == "phy" & questionCat == "aut", 1,
+                                 ifelse(sent.inanim < 0 & 
+                                          factCat == "phy" & questionCat == "per", 
+                                        -1, 0))) %>%
+  select(-factCat, -questionCat)
+
+contrastOrthogonal <- contrastOrthogonal[-1]
+row.names(contrastOrthogonal) = pairsTable$pair
+
+# # test orthogonality
+# # ... for each contrast, do weights sum to 0?
+# colSums(contrastOrthogonal) == 0
+# 
+# # ... are all dot products 0?
+# numdots = sum(1:(length(contrastOrthogonal)))
+# dotprods = NULL
+# for(k in 1:numdots){
+#   for(i in 1:(length(contrastOrthogonal)-1)){
+#     for(j in (i+1):length(contrastOrthogonal)){
+#       dotprods[k] = sum(contrastOrthogonal[i] * contrastOrthogonal[j])    
+#     }
+#   }
+# }
+# dotprods == 0
+
+contrastOrthogonal <- as.matrix(contrastOrthogonal)
+
+# set up planned orthogonal contrasts: [affect + perception] vs. [autonomy]
+contrastOrthogonal2 <- pairsTable %>%
+  mutate(sent.inanim  = ifelse(factCat != "phy" & questionCat != "phy", 7, -9),
+         snt_within = ifelse(sent.inanim > 0 & factCat == questionCat, 2,
+                             ifelse(sent.inanim > 0, -1, 0)),
+         snt_f_othrs.aut = ifelse(sent.inanim > 0 & factCat == "aut", -2,
+                                  ifelse(sent.inanim > 0, 1, 0)),
+         snt_f_aff.per = ifelse(sent.inanim > 0 & factCat == "aff", 1,
+                                ifelse(sent.inanim > 0 & factCat == "per", 
+                                       -1, 0)),
+         snt_q_othrs.aut = ifelse(sent.inanim > 0 & questionCat == "aut", -2,
+                                  ifelse(sent.inanim > 0, 1, 0)),
+         snt_q_aff.per = ifelse(sent.inanim > 0 & questionCat == "aff", 1,
+                                ifelse(sent.inanim > 0 & questionCat == "per", 
+                                       -1, 0)),
+         inan_phyphy.othrs = ifelse(sent.inanim < 0 &
+                                      factCat == questionCat, 6,
+                                    ifelse(sent.inanim < 0, -1, 0)),
+         inan_f_othrs.aut = ifelse(sent.inanim < 0 & factCat == "aut", -2,
+                                   ifelse(sent.inanim < 0 & factCat != "phy", 
+                                          1, 0)),
+         inan_f_aff.per = ifelse(sent.inanim < 0 & factCat == "aff", 1,
+                                 ifelse(sent.inanim < 0 & factCat == "per", 
+                                        -1, 0)),
+         inan_q_othrs.aut = ifelse(sent.inanim < 0 & 
+                                     factCat == "phy" & questionCat == "aut", -2,
+                                   ifelse(sent.inanim < 0 & 
+                                            factCat == "phy" & questionCat != "phy", 
+                                          1, 0)),
+         inan_q_aff.per = ifelse(sent.inanim < 0 & 
+                                   factCat == "phy" & questionCat == "aff", 1,
+                                 ifelse(sent.inanim < 0 & 
+                                          factCat == "phy" & questionCat == "per", 
+                                        -1, 0))) %>%
+  select(-factCat, -questionCat)
+
+contrastOrthogonal2 <- contrastOrthogonal2[-1]
+row.names(contrastOrthogonal2) = pairsTable$pair
+
+# # test orthogonality
+# # ... for each contrast, do weights sum to 0?
+# colSums(contrastOrthogonal2) == 0
+# 
+# # ... are all dot products 0?
+# numdots = sum(1:(length(contrastOrthogonal2)))
+# dotprods = NULL
+# for(k in 1:numdots){
+#   for(i in 1:(length(contrastOrthogonal2)-1)){
+#     for(j in (i+1):length(contrastOrthogonal2)){
+#       dotprods[k] = sum(contrastOrthogonal2[i] * contrastOrthogonal2[j])    
+#     }
+#   }
+# }
+# dotprods == 0
+
+contrastOrthogonal2 <- as.matrix(contrastOrthogonal2)
+
+# effect-coding of demographic variables (UGM = unweighted grand mean)
+contrasts(d$ageGroup) <- cbind("children_UGM" = 
+                                 c(-1, 1)) # adults = -1, children = 1
+contrasts(d$gender) <- cbind("male_UGM" = 
+                               c(-1, 1)) # female = -1, male = 1
+contrasts(d$raceEthn2) <- cbind("ofColor_UGM" = 
+                                  c(1, -1)) # white = -1, of-color = 1
+contrasts(d$country) <- cbind("india_UGM" = 
+                                c(-1, 1)) # us = -1, india = 1
+contrasts(d$framing) <- cbind("opinion_UGM" = 
+                                c(-1, 1)) # logical = -1, opinion = 1
 
 # --- HISTOGRAMS AND COUNTS ---------------------------------------------------
 

@@ -175,12 +175,18 @@ pairsTable <- data_frame(
          pair = factor(paste(factCat, questionCat, sep = "_")))
 
 # add pair variable to dataset
+# add pair and sentient vs. inanimate variables to dataset
 d <- d %>%
   full_join(pairsTable) %>%
   # make us the base country and "does that mean...?" the base framing
   mutate(country = factor(country, levels = c("us", "india")),
          framing = factor(framing, levels = c("does that mean...?",
-                                              "do you think...?")))
+                                              "do you think...?")),
+         sentInan = factor(ifelse(phase == "test",
+                                  ifelse(grepl("phy", pair),
+                                         "inanimate",
+                                         "sentient-only"),
+                                  NA)))
 
 # glimpse(d)
 
