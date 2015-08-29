@@ -181,11 +181,11 @@ d <- d %>%
   mutate(country = factor(country, levels = c("us", "india")),
          framing = factor(framing, levels = c("does that mean...?",
                                               "do you think...?")),
-         sentInam = ifelse(phase == "test",
-                           ifelse(grepl("phy", pair),
-                                  "inanimate",
-                                  "sentient-only"),
-                           NA))
+         sentInan = factor(ifelse(phase == "test",
+                                  ifelse(grepl("phy", pair),
+                                         "inanimate",
+                                         "sentient-only"),
+                                  NA)))
 
 # glimpse(d)
 
@@ -198,7 +198,7 @@ compAbsMean <- function(studyNum, var.equal = "test") {
   # make summary table for this study
   tab <- d %>%
     filter(phase == "test" & study == studyNum) %>%
-    group_by(sentInam) %>%
+    group_by(sentInan) %>%
     summarise(mean = mean(response, na.rm = T),
               absMean = abs(mean),
               sd = sd(response, na.rm = T),
@@ -211,7 +211,7 @@ compAbsMean <- function(studyNum, var.equal = "test") {
   
   # test for equal variances
   varTest <- with(d %>% filter(phase == "test" & study == studyNum), 
-                  var.test(response ~ sentInam))
+                  var.test(response ~ sentInan))
   if(var.equal == "test") {
     var.equal <- ifelse(varTest$p.value < 0.10, F, T)
   }
@@ -251,7 +251,7 @@ compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
   # make summary table for this study
   tab <- d %>%
     filter(phase == "test" & study %in% studyNum) %>%
-    group_by(country, sentInam) %>%
+    group_by(country, sentInan) %>%
     summarise(mean = mean(response, na.rm = T),
               absMean = abs(mean),
               sd = sd(response, na.rm = T),
@@ -267,7 +267,7 @@ compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
   
   # test for equal variances
   varTest <- with(d %>% filter(phase == "test" & study == studyNum), 
-                  bartlett.test(response ~ interaction(country, sentInam)))
+                  bartlett.test(response ~ interaction(country, sentInan)))
   if(var.equal == "test") {
     var.equal <- ifelse(varTest$p.value < 0.10, F, T)
   }
@@ -328,3 +328,85 @@ compAbsMean_byCountry <- function(studyNum, var.equal = "test") {
 }
 compAbsMean_byCountry(studyNum = c(1,3))
 compAbsMean_byCountry(studyNum = 4)
+
+# --- REGRESSION ANALYSIS: SENTIENT-ONLY vs. INANIMTE TRIALS ------------------
+
+# r1a <- lmer(response ~ -1 + sentInan + (1 | subid),
+#             data = subset(d, phase == "test" & study == "1"))
+# summary(r1a)
+
+r1b <- lmer(response ~ -1 + sentInan + (sentInan | subid),
+            data = subset(d, phase == "test" & study == "1"))
+summary(r1b)
+
+r2b <- lmer(response ~ -1 + sentInan + (sentInan | subid),
+            data = subset(d, phase == "test" & study == "2"))
+summary(r2b)
+
+r3b <- lmer(response ~ -1 + sentInan + (sentInan | subid),
+            data = subset(d, phase == "test" & study == "3"))
+summary(r3b)
+
+contrasts(d$sentInan)
+
+r4b <- lmer(response ~ sentInan * country + (sentInan | subid),
+            data = subset(d, phase == "test" & study == "4"))
+summary(r4b)
+
+# r1 <- lm(response ~ -1 + sentInan,
+#          data = subset(d, phase == "test" & study == "1"))
+# summary(r1)
+# cohensD_inan <- (summary(r1)$coefficients[1,3]*2)/sqrt(summary(r1)$df[2])
+# cohensD_sent <- (summary(r1)$coefficients[2,3]*2)/sqrt(summary(r1)$df[2])
+
+# --- WITHIN-SUBJECTS T-TESTS OF ABSOLUTE VALUES OF MEANS ---------------------
+
+# make summary dataframe for mean (and absolute mean) responses for 
+# sentient-only vs. inanimate trials, by subject (and demographic grouping vars)
+withinSubj <- d %>%
+  filter(phase == "test" & study != "1prime") %>%
+  mutate(sentInan = factor(sentInan, labels = c("inanimate", "sentientOnly"))) %>%
+  group_by(study, country, ageGroup, raceEthn2, subid, sentInan) %>%
+  summarise(mean = mean(response, na.rm = T)) %>%
+  spread(sentInan, mean) %>%
+  mutate(diff = inanimate - sentientOnly,
+         inanimate_abs = abs(inanimate),
+         sentientOnly_abs = abs(sentientOnly),
+         diff_abs = inanimate_abs - sentientOnly_abs)
+withinSubj
+
+# study 1: us adults
+with(subset(withinSubj, study == 1), 
+     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+
+# study 2: us children
+with(subset(withinSubj, study == 2), 
+     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+
+# studies 1 & 2: compare us adults & us children
+with(subset(withinSubj, study == 1 | study == 2), 
+     t.test(diff_abs ~ ageGroup))
+
+# study 2: compare white children & children of color
+with(subset(withinSubj, study == 2), 
+     t.test(diff_abs ~ raceEthn2))
+
+# study 3: indian adults
+with(subset(withinSubj, study == 3), 
+     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+
+# studies 1 & 3: compare us adults & indian adults
+with(subset(withinSubj, study == 1 | study == 3), 
+     t.test(diff_abs ~ country))
+
+# study 4: us adults
+with(subset(withinSubj, study == 4 & country == "us"), 
+     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+
+# study 4: indian adults
+with(subset(withinSubj, study == 4 & country == "india"), 
+     t.test(inanimate_abs, sentientOnly_abs, paired = T))
+
+# study 4: compare us adults & indian adults
+with(subset(withinSubj, study == 4), 
+     t.test(diff_abs ~ country))
