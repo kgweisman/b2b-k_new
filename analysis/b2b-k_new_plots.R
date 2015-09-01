@@ -117,9 +117,11 @@ plotQP <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
     return(g)
 }
 
@@ -146,9 +148,11 @@ plotQPCompAge <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -176,9 +180,11 @@ plotQPCompRE <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -206,9 +212,11 @@ plotQPCompCountry <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -238,9 +246,11 @@ plotQPCompFraming <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -269,9 +279,11 @@ plotQPCompStudies123 <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.7, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -377,9 +389,11 @@ plotSent <- function(studyNum, countryName, ageGroup, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.5, stat = "identity") +
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -406,9 +420,11 @@ plotSentCompAge <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -436,9 +452,11 @@ plotSentCompRE <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -465,9 +483,11 @@ plotSentCompCountry <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -496,9 +516,11 @@ plotSentCompFraming <- function(studyNum, scoreType, blank = F) {
              position = position_dodge(0.7), width = 0.5, stat = "identity") + 
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), # 95% CI
                   position = position_dodge(0.7), width = .2, size = .3) +
-    scale_y_continuous(breaks = seq(-1.5, 1.5, 1),
-                       labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
-                                  '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)'))
+    scale_y_continuous(breaks = seq(-1.5, 1.5, 1)
+#                        ,
+#                        labels = c('"Really No"\n(-1.5)', '"Maybe No"\n(-0.5)',
+#                                   '"Maybe Yes"\n(0.5)', '"Really Yes"\n(1.5)')
+                       )
   return(g)
 }
 
@@ -880,7 +902,7 @@ png(file="figure_03.png",width=1800,height=1400)
 plotSoup(r4all, studies = 4)
 dev.off()
 
-# figure 4
-png(file="figure_04.png",width=2540,height=1400)
-plotSoup(r134, studies = c(1,3:4))
-dev.off()
+# # figure 4
+# png(file="figure_04.png",width=2540,height=1400)
+# plotSoup(r134, studies = c(1,3:4))
+# dev.off()
