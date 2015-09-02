@@ -403,6 +403,13 @@ meansPrint("1", contrast = "inan_phyphy.othrs")
 
 round(summary(r1.orth)$coefficients,2)
 
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r1.orthSTD <- lmer(scale(response) ~ pair + (1 | subid), 
+                subset(d, phase == "test" & study == "1"))
+summary(r1.orthSTD)
+round(summary(r1.orthSTD)$coefficients,2)
+
 # affect-affect
 with(d %>% filter(study == "1" & country == "us" & phase == "test") %>%
        filter(factCat == "aff" & questionCat == "aff"), 
@@ -491,6 +498,13 @@ meansPrint("2", contrast = "inan_q_aut.per")
 
 round(summary(r2.orth)$coefficients,2)
 
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r2.orthSTD <- lmer(scale(response) ~ pair + gender + scale(age) + (1 | subid), 
+                   subset(d, phase == "test" & study == "2"))
+summary(r2.orthSTD)
+round(summary(r2.orthSTD)$coefficients,2)
+
 # affect-affect
 with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
        filter(factCat == "aff" & questionCat == "aff"), 
@@ -524,6 +538,14 @@ anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
 summary(r2.orthAgeGrpInt)
 
 round(summary(r2.orthAgeGrpInt)$coefficients,2)
+
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r2.orthAgeGrpIntSTD <- lmer(scale(response) ~ pair * ageGroup + (1 | subid), 
+                            subset(d, phase == "test" & 
+                                     (study == "1" | study == "2")))
+summary(r2.orthAgeGrpIntSTD)
+round(summary(r2.orthAgeGrpIntSTD)$coefficients,2)
 
 # # adult/child comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -606,6 +628,14 @@ summary(r2.orthREint)
 
 round(summary(r2.orthREint)$coefficients,2)
 
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+r2.orthREintSTD <- lmer(scale(response) ~ pair * raceEthn2 + gender + scale(age) + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     raceEthn2 != "NA"))
+summary(r2.orthREintSTD)
+round(summary(r2.orthREintSTD)$coefficients,2)
+
 # # race/ethnicity comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 # r2.orthBinREadd <- glmer(ynResponse ~ pair + raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
@@ -626,6 +656,15 @@ r2.orth2way <- lmer(response ~ pair * gender * scale(age, scale = F)
                     subset(d, phase == "test" & study == "2"))
 summary(r2.orth2way)
 round(summary(r2.orth2way)$coefficients, 2)
+
+# STANDARDIZED three-way interactions with gender and age
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r2.orth2waySTD <- lmer(scale(response) ~ pair * gender * scale(age) 
+                    + (1 | subid), 
+                    subset(d, phase == "test" & study == "2"))
+summary(r2.orth2waySTD)
+round(summary(r2.orth2waySTD)$coefficients, 2)
+
 
 # four-way interactions with gender, age, and raceEthn2
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -668,6 +707,14 @@ meansPrint("3", countryName = "india", contrast = "inan_q_aut.per")
 
 round(summary(r3.orth)$coefficients,2)
 
+
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r3.orthSTD <- lmer(scale(response) ~ pair + (1 | subid), 
+                   subset(d, phase == "test" & study == "3"))
+summary(r3.orthSTD)
+round(summary(r3.orthSTD)$coefficients,2)
+
 # affect-affect
 with(d %>% filter(study == "3" & country == "india" & phase == "test") %>%
        filter(factCat == "aff" & questionCat == "aff"), 
@@ -685,22 +732,29 @@ with(d %>% filter(study == "3" & country == "india" & phase == "test") %>%
 #                 family = "binomial")
 # summary(r3.orthBin)
 
-# # us/india comparison: orthogonal contrasts
-# contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-# r3.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
-#                           subset(d, (phase == "test") & 
-#                                    (study == "1" | study == "3")))
-# r3.orthCountryAdd <- lmer(response ~ pair + country + (1 | subid), 
-#                           subset(d, (phase == "test") & 
-#                                    (study == "1" | study == "3")))
-# r3.orthCountryInt <- lmer(response ~ pair * country + (1 | subid), 
-#                           subset(d, (phase == "test") & 
-#                                    (study == "1" | study == "3")))
-# anova(r3.orthCountrySimp, r3.orthCountryAdd, r3.orthCountryInt)
-# anova(r3.orthCountrySimp, r3.orthCountryInt)
-# summary(r3.orthCountryInt)
-# 
-# round(summary(r3.orthCountryInt)$coefficients,2)
+# us/india comparison: orthogonal contrasts
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r3.orthCountrySimp <- lmer(response ~ pair + (1 | subid), 
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
+r3.orthCountryAdd <- lmer(response ~ pair + country + (1 | subid), 
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
+r3.orthCountryInt <- lmer(response ~ pair * country + (1 | subid), 
+                          subset(d, (phase == "test") & 
+                                   (study == "1" | study == "3")))
+anova(r3.orthCountrySimp, r3.orthCountryAdd, r3.orthCountryInt)
+anova(r3.orthCountrySimp, r3.orthCountryInt)
+summary(r3.orthCountryInt)
+
+round(summary(r3.orthCountryInt)$coefficients,2)
+
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+r3.orthCountryInt <- lmer(scale(response) ~ pair * country + (1 | subid), 
+                        data = subset(d, phase == "test" & 
+                                        study == "1" | study == "3"))
+summary(r3.orthCountryInt)
+round(summary(r3.orthCountryInt)$coefficients,2)
 
 # # us/india comparison: orthogonal contrasts on binary values
 # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -769,6 +823,13 @@ summary(r4.orthCountryInt)
 
 round(summary(r4.orthCountryInt)$coefficients,2)
 
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+r4.orthCountryIntSTD <- lmer(scale(response) ~ pair * country + (1 | subid), 
+                          data = subset(d, phase == "test" & 
+                                          study == "4"))
+summary(r4.orthCountryIntSTD)
+round(summary(r4.orthCountryIntSTD)$coefficients,2)
+
 meansPrint("4", contrast = "sent.inanim")
 meansPrint("4", contrast = "snt_within.between")
 # meansPrint("4", contrast = "snt_f_aff.othrs")
@@ -811,6 +872,14 @@ anova(r4.orthCntryFrmSimp, r4.orthCntryFrmInt2)
 summary(r4.orthCntryFrmInt2)
 
 round(summary(r4.orthCntryFrmInt2)$coefficients, 2)
+
+# STANDARDIZED us/india comparison, framing comparison: orthogonal contrasts
+r4.orthCntryFrmInt2STD <- lmer(scale(response) ~ pair * country * framing + (1 | subid), 
+                            subset(d, phase == "test" & 
+                                     study != "2" & study != "1prime"))
+summary(r4.orthCntryFrmInt2STD)
+round(summary(r4.orthCntryFrmInt2STD)$coefficients, 2)
+
 
 # # write regression results table to csv
 # temp <- round(summary(r4.orthCntryFrmInt2)$coefficients, 2)
