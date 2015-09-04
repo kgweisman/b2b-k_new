@@ -210,10 +210,10 @@ dDuration <- d %>%
 
 # get 95% CIs on duration
 # library(langcog)
-# # ... by country
-# multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
-# # ... overall
-# multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", statistics_functions = c("ci_lower", "mean", "ci_upper"))
+# ... by country
+multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study", "country"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
+# ... overall
+multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
 
 # gender by study
 sum_gender <- d %>% distinct(subid) %>% group_by(study, country, gender) %>% summarise(n = length(gender))
