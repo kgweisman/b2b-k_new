@@ -199,10 +199,10 @@ withinSubj <- d %>%
   group_by(study, country, ageGroup, raceEthn2, subid, sentInan) %>%
   summarise(mean = mean(response, na.rm = T)) %>%
   spread(sentInan, mean) %>%
-  mutate(diff = inanimate - sentientOnly,
+  mutate(diff = sentientOnly - inanimate,
          inanimate_abs = abs(inanimate),
          sentientOnly_abs = abs(sentientOnly),
-         diff_abs = inanimate_abs - sentientOnly_abs)
+         diff_abs = sentientOnly_abs - inanimate_abs)
 # View(withinSubj)
 
 # study 1: us adults
