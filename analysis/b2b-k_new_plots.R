@@ -597,9 +597,9 @@ sumGrpsQP <- c("study", "country", "ageGroup", "framing", "respWording",
 
 sumGrpsQPRE <- c(sumGrpsQP, "raceEthn2")
 
-sumGrpsSent <- c(sumGrpsQP, "sent")
+sumGrpsSent <- c("study", "country", "ageGroup", "framing", "respWording", "sent")
 
-sumGrpsSentRE <- c(sumGrpsQP, "sent", "raceEthn2")
+sumGrpsSentRE <- c(sumGrpsSent, "sent", "raceEthn2")
 
 # ------ all possible fact-question pairings: RAW SCORES ----------------------
 
