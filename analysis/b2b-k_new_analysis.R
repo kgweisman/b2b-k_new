@@ -220,7 +220,7 @@ sum_gender <- d %>% distinct(subid) %>% group_by(study, country, gender) %>% sum
 # print(sum_gender)
 
 # age by study (years; children only)
-sum_age <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(age), sd = sd(age), min = min(age), max = max(age))
+sum_age <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(age, na.rm = T), sd = sd(age, na.rm = T), min = min(age), max = max(age))
 # print(sum_age)
 
 # race/ethnicity by study
