@@ -522,49 +522,6 @@ with(d %>% filter(study == "2" & country == "us" & phase == "test") %>%
 #                    family = "binomial")
 # summary(r2.orthBin)
 
-# adult/child comparison: orthogonal contrasts
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
-                          subset(d, phase == "test" & 
-                                   (study == "1" | study == "2")))
-r2.orthAgeGrpAdd <- lmer(response ~ pair + ageGroup + (1 | subid), 
-                         subset(d, phase == "test" & 
-                                  (study == "1" | study == "2")))
-r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid), 
-                         subset(d, phase == "test" & 
-                                  (study == "1" | study == "2")))
-anova(r2.orthAgeGrpSimp, r2.orthAgeGrpAdd, r2.orthAgeGrpInt)
-anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
-summary(r2.orthAgeGrpInt)
-
-round(summary(r2.orthAgeGrpInt)$coefficients,2)
-
-# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
-contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-r2.orthAgeGrpIntSTD <- lmer(scale(response) ~ pair * ageGroup + (1 | subid), 
-                            subset(d, phase == "test" & 
-                                     (study == "1" | study == "2")))
-summary(r2.orthAgeGrpIntSTD)
-round(summary(r2.orthAgeGrpIntSTD)$coefficients,2)
-
-# # adult/child comparison: orthogonal contrasts on binary values
-# contrasts(d$pair, how.many = 11) <- contrastOrthogonal
-# r2.orthBinAgeGrpSimp <- glmer(ynResponse ~ pair + (1 | subid), 
-#                           subset(d, phase == "test" & 
-#                                    (study == "1" | study == "2")),
-#                           family = "binomial")
-# r2.orthBinAgeGrpAdd <- glmer(ynResponse ~ pair + ageGroup + (1 | subid), 
-#                              subset(d, phase == "test" & 
-#                                       (study == "1" | study == "2")),
-#                              family = "binomial")
-# r2.orthBinAgeGrpInt <- glmer(ynResponse ~ pair * ageGroup + (1 | subid),
-#                              subset(d, phase == "test" & 
-#                                       (study == "1" | study == "2")),
-#                              family = "binomial")
-# anova(r2.orthBinAgeGrpSimp, r2.orthBinAgeGrpAdd, r2.orthBinAgeGrpInt)
-# anova(r2.orthBinAgeGrpSimp, r2.orthBinAgeGrpInt)
-# summary(r2.orthBinAgeGrpInt)
-
 # race/ethnicity comparison: chi-squared & t-tests tests
 # ... for age
 d.age <- d %>% 
@@ -611,9 +568,9 @@ summary(r2.neutREint)
 # race/ethnicity comparison: orthogonal contrasts
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r2.orthREsimp <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
-                     data = subset(d, phase == "test" & 
-                                     study == "2" & 
-                                     raceEthn2 != "NA"))
+                      data = subset(d, phase == "test" & 
+                                      study == "2" & 
+                                      raceEthn2 != "NA"))
 r2.orthREadd <- lmer(response ~ pair + raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
@@ -630,9 +587,9 @@ round(summary(r2.orthREint)$coefficients,2)
 
 # STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
 r2.orthREintSTD <- lmer(scale(response) ~ pair * raceEthn2 + gender + scale(age) + (1 | subid), 
-                     data = subset(d, phase == "test" & 
-                                     study == "2" & 
-                                     raceEthn2 != "NA"))
+                        data = subset(d, phase == "test" & 
+                                        study == "2" & 
+                                        raceEthn2 != "NA"))
 summary(r2.orthREintSTD)
 round(summary(r2.orthREintSTD)$coefficients,2)
 
@@ -660,11 +617,10 @@ round(summary(r2.orth2way)$coefficients, 2)
 # STANDARDIZED three-way interactions with gender and age
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r2.orth2waySTD <- lmer(scale(response) ~ pair * gender * scale(age) 
-                    + (1 | subid), 
-                    subset(d, phase == "test" & study == "2"))
+                       + (1 | subid), 
+                       subset(d, phase == "test" & study == "2"))
 summary(r2.orth2waySTD)
 round(summary(r2.orth2waySTD)$coefficients, 2)
-
 
 # four-way interactions with gender, age, and raceEthn2
 contrasts(d$pair, how.many = 11) <- contrastOrthogonal
@@ -674,6 +630,75 @@ r2.orth3way <- lmer(response ~ pair * gender * scale(age, scale = F)
                     subset(d, phase == "test" & study == "2"))
 summary(r2.orth3way)
 round(summary(r2.orth3way)$coefficients, 2)
+
+
+# adult/child comparison: orthogonal contrasts
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+
+devo <- d %>%
+  filter(study %in% c("1", "2")) %>%
+  mutate(group = factor(ifelse(study == "1", "adults", as.character(raceEthn2)))) %>%
+  filter(!is.na(group))
+contrasts(devo$pair, how.many = 11) <- contrastOrthogonal
+# contrasts(devo$pair, how.many = 11) <- contrastNeutral
+contrasts(devo$group) <- cbind("COC_adults" = c(0, 1, 0), "W_adults" = c(0, 0, 1))
+
+devo.orthSimp <- lmer(response ~ pair + (1 | subid),
+                      subset(devo, phase == "test" & (study == "1" | study == "2")))
+devo.orthAddAge <- lmer(response ~ pair + group + (1 | subid),
+                        subset(devo, phase == "test" & (study == "1" | study == "2")))
+devo.orthIntAge <- lmer(response ~ pair * group + (1 | subid),
+                        subset(devo, phase == "test" & (study == "1" | study == "2")))
+
+anova(devo.orthSimp, devo.orthAddAge, devo.orthIntAge)
+summary(devo.orthIntAge)
+
+round(summary(devo.orthIntAge)$coefficients,2)
+
+
+# # adult/child comparison: orthogonal contrasts
+# contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+# r2.orthAgeGrpSimp <- lmer(response ~ pair + (1 | subid), 
+#                           subset(d, phase == "test" & 
+#                                    (study == "1" | study == "2")))
+# r2.orthAgeGrpAdd <- lmer(response ~ pair + ageGroup + (1 | subid), 
+#                          subset(d, phase == "test" & 
+#                                   (study == "1" | study == "2")))
+# r2.orthAgeGrpInt <- lmer(response ~ pair * ageGroup + (1 | subid), 
+#                          subset(d, phase == "test" & 
+#                                   (study == "1" | study == "2")))
+# anova(r2.orthAgeGrpSimp, r2.orthAgeGrpAdd, r2.orthAgeGrpInt)
+# anova(r2.orthAgeGrpSimp, r2.orthAgeGrpInt)
+# summary(r2.orthAgeGrpInt)
+# 
+# round(summary(r2.orthAgeGrpInt)$coefficients,2)
+# 
+# # STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+# contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+# r2.orthAgeGrpIntSTD <- lmer(scale(response) ~ pair * ageGroup + (1 | subid), 
+#                             subset(d, phase == "test" & 
+#                                      (study == "1" | study == "2")))
+# summary(r2.orthAgeGrpIntSTD)
+# round(summary(r2.orthAgeGrpIntSTD)$coefficients,2)
+# 
+# # # adult/child comparison: orthogonal contrasts on binary values
+# # contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+# # r2.orthBinAgeGrpSimp <- glmer(ynResponse ~ pair + (1 | subid), 
+# #                           subset(d, phase == "test" & 
+# #                                    (study == "1" | study == "2")),
+# #                           family = "binomial")
+# # r2.orthBinAgeGrpAdd <- glmer(ynResponse ~ pair + ageGroup + (1 | subid), 
+# #                              subset(d, phase == "test" & 
+# #                                       (study == "1" | study == "2")),
+# #                              family = "binomial")
+# # r2.orthBinAgeGrpInt <- glmer(ynResponse ~ pair * ageGroup + (1 | subid),
+# #                              subset(d, phase == "test" & 
+# #                                       (study == "1" | study == "2")),
+# #                              family = "binomial")
+# # anova(r2.orthBinAgeGrpSimp, r2.orthBinAgeGrpAdd, r2.orthBinAgeGrpInt)
+# # anova(r2.orthBinAgeGrpSimp, r2.orthBinAgeGrpInt)
+# # summary(r2.orthBinAgeGrpInt)
+
 
 # --- STUDY 3 -----------------------------------------------------------------
 
