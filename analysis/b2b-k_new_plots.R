@@ -88,7 +88,10 @@ d <- d %>%
                                               "do you think...?")),
          country = factor(country, levels = c("us", "india")),
          ageGroup = factor(ageGroup, levels = c("adults", " children")),
-         raceEthn2 = factor(raceEthn2, levels = c("white", "of-color")))
+         raceEthn2 = factor(raceEthn2, levels = c("white", "of-color"))) %>%
+  # reorder levels of fact and question categories
+  mutate(factCat = factor(factCat, levels = c("aff", "per", "aut", "phy")),
+         questionCat = factor(questionCat, levels = c("aff", "per", "aut", "phy")))
 
 # glimpse(d)
 
@@ -321,21 +324,12 @@ plotQPFormat <- function(plot, scoreType) {
               strip.text = element_text(size = 48)) +
         labs(x = "FACT Category", 
              y = "Mean Rating\n") +
-      scale_x_discrete(labels = c("\nAffect", "\nAutonomy", 
-                                  "\nPerception", "\nInanimate\nMaterial")) +
-#     scale_fill_grey(name = "QUESTION Category", 
-#                     labels = c(" Affect ", " Autonomy ", 
-#                                " Perception ", " Inanimate Material "))
-#   
-#     scale_fill_manual(name = "QUESTION Category", 
-#                       labels = c(" Affect ", " Autonomy ", 
-#                                    " Perception ", " Inanimate Material "),
-#                       values = c("darkred", "darkgreen", "darkblue", "gray")) 
-
+      scale_x_discrete(labels = c("\nAffect", "\nPerception", "\nAutonomy", 
+                                  "\nInanimate\nMaterial")) +
       scale_fill_manual(name = "QUESTION Category", 
-                        labels = c(" Affect ", " Autonomy ", 
-                                   " Perception ", " Inanimate Material "),
-                        values = c(brewer.pal(3, "Set2"), "grey")) 
+                        labels = c(" Affect ", " Perception ", " Autonomy ", 
+                                   " Inanimate Material "),
+                        values = c(brewer.pal(3, "Set2")[c(2, 3, 1)], "grey")) 
 
   # provide study numbers in title
   if (length(studyNum) == 1) {
