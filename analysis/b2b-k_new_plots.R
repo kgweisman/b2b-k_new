@@ -774,10 +774,12 @@ r4india <- plotQPFormat(plotQP("4", "india", "adults", "raw"), "raw")
 r12 <- plotQPFormat(plotQPCompAge(c("1", "2"), "raw"), "raw")
 r2re <- plotQPFormat(plotQPCompRE(c("2", "2"), "raw"), "raw")
 r13 <- plotQPFormat(plotQPCompCountry(c("1", "3"), "raw"), "raw")
-r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw")
+r4all <- plotQPFormat(plotQPCompCountry(c("4", "4"), "raw"), "raw") +
+  labs(title = "Study S1")
 
 # plot 4-way comparison of framing by country (adults)
-r134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw")
+r134 <- plotQPFormat(plotQPCompFraming(c("1", "3", "4"), "raw"), "raw") +
+  labs(title = "Studies 1, 3, & S1")
 
 # plot studies 1-3 in a row
 r123 <- plotQPFormat(plotQPCompStudies123(c("1", "2", "3"), "raw"), "raw")
