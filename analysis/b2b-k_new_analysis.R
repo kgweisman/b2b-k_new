@@ -188,16 +188,31 @@ d <- d %>%
                                          "sentient-only"),
                                   NA)))
 
+# add new ethno-cultural coding
+d <- d %>%
+  mutate(cultEx = 
+           factor(
+             ifelse(!raceEthn3 %in% c("white-only", "some-asian"), 
+                    NA, as.character(raceEthn3))),
+         cultEx1 = 
+           factor(
+             ifelse(raceEthn == "unknown", NA,
+                    ifelse(grepl("A", raceEthn) | 
+                             grepl("I", raceEthn) | 
+                             grepl("ME", raceEthn),
+                           "A or I or ME",
+                           "not"))))
+
 # glimpse(d)
 
 # --- DEMOGRAPHICS ------------------------------------------------------------
 
 # sample size by study
-sum_sampleSize <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(n = length(subid))
+sum_sampleSize <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country) %>% summarise(n = length(subid))
 # print(sum_sampleSize)
 
 # sequence assignment by study
-sum_sequenceAssign <- d %>% distinct(subid) %>% group_by(study, country, sequence) %>% summarise(n = length(subid))
+sum_sequenceAssign <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country, sequence) %>% summarise(n = length(subid))
 # print(sum_sequenceAssign)
 
 # duration by study (minutes; adults only)
@@ -209,33 +224,33 @@ dDuration <- d %>%
                                  durationOfTest))
 
 # get 95% CIs on duration
-# library(langcog)
+library(langcog)
 # ... by country
-multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study", "country"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
+multi_boot(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study", "country"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
 # ... overall
-multi_boot.data.frame(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
+multi_boot(dDuration, summary_function = "mean", column = "durationOfTest", summary_groups = c("study"), statistics_functions = c("ci_lower", "mean", "ci_upper"))
 
 # gender by study
-sum_gender <- d %>% distinct(subid) %>% group_by(study, country, gender) %>% summarise(n = length(gender))
+sum_gender <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country, gender) %>% summarise(n = length(gender))
 # print(sum_gender)
 
 # age by study (years; children only)
-sum_age <- d %>% distinct(subid) %>% group_by(study, country) %>% summarise(m = mean(age, na.rm = T), sd = sd(age, na.rm = T), min = min(age), max = max(age))
+sum_age <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country) %>% summarise(m = mean(age, na.rm = T), sd = sd(age, na.rm = T), min = min(age), max = max(age))
 # print(sum_age)
 
 # race/ethnicity by study
 # ... finest grain
-sum_raceEthn4 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn4) %>% summarise(n = length(raceEthn4))
+sum_raceEthn4 <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country, raceEthn4) %>% summarise(n = length(raceEthn4))
 # print(sum_raceEthn4)
 # ... white-only/some-eastern/other
-sum_raceEthn3 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn3) %>% summarise(n = length(raceEthn3))
+sum_raceEthn3 <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country, raceEthn3) %>% summarise(n = length(raceEthn3))
 # print(sum_raceEthn3)
 # ... coarsest grain
-sum_raceEthn2 <- d %>% distinct(subid) %>% group_by(study, country, raceEthn2) %>% summarise(n = length(raceEthn2))
+sum_raceEthn2 <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country, raceEthn2) %>% summarise(n = length(raceEthn2))
 # print(sum_raceEthn2)
 
 # religion by study (study 4 only)
-sum_religion <- d %>% distinct(subid) %>% group_by(study, country, religion) %>% summarise(n = length(religion))
+sum_religion <- d %>% distinct(subid, .keep_all = T) %>% group_by(study, country, religion) %>% summarise(n = length(religion))
 # print(sum_religion)
 
 # --- CONTRASTS ---------------------------------------------------------------
@@ -364,6 +379,8 @@ contrasts(d$gender) <- cbind("male_UGM" =
                                c(-1, 1)) # female = -1, male = 1
 contrasts(d$raceEthn2) <- cbind("ofColor_UGM" = 
                                   c(1, -1)) # white = -1, of-color = 1
+contrasts(d$cultEx) <- cbind("someAsian_UGM" = 
+                                  c(1, -1)) # white-only = -1, some-asian = 1
 contrasts(d$country) <- cbind("india_UGM" = 
                                 c(-1, 1)) # us = -1, india = 1
 contrasts(d$framing) <- cbind("opinion_UGM" = 
@@ -535,7 +552,7 @@ r2.tAge <- t.test(age ~ raceEthn2, var.equal = T, d.age); r2.tAge
 r2.tableGender <- with(d %>% 
                          filter(phase == "test" & study == "2") %>% 
                          select(subid, gender, raceEthn2) %>% 
-                         distinct(subid), 
+                         distinct(subid, .keep_all = T), 
                        table(gender, raceEthn2)); r2.tableGender
 r2.chisqGender <- summary(r2.tableGender); r2.chisqGender
 
@@ -543,7 +560,7 @@ r2.chisqGender <- summary(r2.tableGender); r2.chisqGender
 r2.tableSequence <- with(d %>% 
                            filter(phase == "test" & study == "2") %>% 
                            select(subid, sequence, raceEthn2) %>% 
-                           distinct(subid), 
+                           distinct(subid, .keep_all = T), 
                          table(sequence, raceEthn2)); r2.tableSequence
 r2.chisqSequence <- summary(r2.tableSequence); r2.chisqSequence
 
@@ -599,6 +616,90 @@ round(summary(r2.orthREintSTD)$coefficients,2)
 #                      subset(d, phase == "test" & study == "2"),
 #                      family = "binomial")
 # r2.orthBinREint <- glmer(ynResponse ~ pair * raceEthn2 + gender + scale(age, scale = F) + (1 | subid), 
+#                      subset(d, phase == "test" & study == "2"),
+#                      family = "binomial")
+# anova(r2.orth, r2.orthBinREadd, r2.orthBinREint)
+# anova(r2.orth, r2.orthBinREint)
+# summary(r2.orthBinREint)
+
+# NEW 2016-07-27: cultural exposure (white-only vs. some asian)
+# cultural exposure comparison: chi-squared & t-tests tests
+# ... for age
+d.age <- d %>% 
+  filter(study == "2") %>%
+  select(subid, age, cultEx1) %>%
+  distinct()
+
+r2.tAge <- t.test(age ~ cultEx1, var.equal = T, d.age); r2.tAge
+
+# ... for gender
+r2.tableGender <- with(d %>% 
+                         filter(phase == "test" & study == "2") %>% 
+                         select(subid, gender, cultEx1) %>% 
+                         distinct(subid, .keep_all = T), 
+                       table(gender, cultEx1)); r2.tableGender
+r2.chisqGender <- summary(r2.tableGender); r2.chisqGender
+
+# ... for sequence assignment
+r2.tableSequence <- with(d %>% 
+                           filter(phase == "test" & study == "2") %>% 
+                           select(subid, sequence, cultEx1) %>% 
+                           distinct(subid, .keep_all = T), 
+                         table(sequence, cultEx1)); r2.tableSequence
+r2.chisqSequence <- summary(r2.tableSequence); r2.chisqSequence
+
+# cultural exposure comparison: comparison to neutral
+contrasts(d$pair) <- contrastNeutral
+r2.neutREsimp <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
+                      data = subset(d, phase == "test" & 
+                                      study == "2" & 
+                                      cultEx1 != "NA"))
+r2.neutREadd <- lmer(response ~ pair + cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     cultEx1 != "NA"))
+r2.neutREint <- lmer(response ~ pair * cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     cultEx1 != "NA"))
+anova(r2.neutREsimp, r2.neutREadd, r2.neutREint)
+anova(r2.neutREsimp, r2.neutREint)
+summary(r2.neutREint)
+
+# cultural exposure comparison: orthogonal contrasts
+contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+r2.orthREsimp <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
+                      data = subset(d, phase == "test" & 
+                                      study == "2" & 
+                                      cultEx1 != "NA"))
+r2.orthREadd <- lmer(response ~ pair + cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     cultEx1 != "NA"))
+r2.orthREint <- lmer(response ~ pair * cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                     data = subset(d, phase == "test" & 
+                                     study == "2" & 
+                                     cultEx1 != "NA"))
+anova(r2.orthREsimp, r2.orthREadd, r2.orthREint)
+anova(r2.orthREsimp, r2.orthREint)
+summary(r2.orthREint)
+
+round(summary(r2.orthREint)$coefficients,2)
+
+# STANDARDIZED orthogonal contrasts: [affect] vs. [autonomy + perception]
+r2.orthREintSTD <- lmer(scale(response) ~ pair * cultEx + gender + scale(age) + (1 | subid), 
+                        data = subset(d, phase == "test" & 
+                                        study == "2" & 
+                                        cultEx != "NA"))
+summary(r2.orthREintSTD)
+round(summary(r2.orthREintSTD)$coefficients,2)
+
+# # cultural exposure comparison: orthogonal contrasts on binary values
+# contrasts(d$pair, how.many = 11) <- contrastOrthogonal
+# r2.orthBinREadd <- glmer(ynResponse ~ pair + cultEx + gender + scale(age, scale = F) + (1 | subid), 
+#                      subset(d, phase == "test" & study == "2"),
+#                      family = "binomial")
+# r2.orthBinREint <- glmer(ynResponse ~ pair * cultEx + gender + scale(age, scale = F) + (1 | subid), 
 #                      subset(d, phase == "test" & study == "2"),
 #                      family = "binomial")
 # anova(r2.orth, r2.orthBinREadd, r2.orthBinREint)
