@@ -190,17 +190,22 @@ d <- d %>%
 
 # add new ethno-cultural coding
 d <- d %>%
-  mutate(cultEx = 
+  mutate(raceEthn = gsub("AA", "B", raceEthn),
+         cultEx = 
            factor(
-             ifelse(!raceEthn3 %in% c("white-only", "some-asian"), 
-                    NA, as.character(raceEthn3))),
+             ifelse(raceEthn == "unknown", NA,
+                    ifelse(grepl("A", raceEthn) | 
+                             grepl("I", raceEthn),
+                           "A or I",
+                           ifelse(raceEthn == "C",
+                                  "C",
+                                  NA)))),
          cultEx1 = 
            factor(
              ifelse(raceEthn == "unknown", NA,
                     ifelse(grepl("A", raceEthn) | 
-                             grepl("I", raceEthn) | 
-                             grepl("ME", raceEthn),
-                           "A or I or ME",
+                             grepl("I", raceEthn),
+                           "A or I",
                            "not"))))
 
 # glimpse(d)
@@ -379,8 +384,9 @@ contrasts(d$gender) <- cbind("male_UGM" =
                                c(-1, 1)) # female = -1, male = 1
 contrasts(d$raceEthn2) <- cbind("ofColor_UGM" = 
                                   c(1, -1)) # white = -1, of-color = 1
-contrasts(d$cultEx) <- cbind("someAsian_UGM" = 
-                                  c(1, -1)) # white-only = -1, some-asian = 1
+contrasts(d$cultEx) <- cbind("asian_UGM" = c(1, -1)) # white-only = 1, some-asian = 0, other = -1
+contrasts(d$cultEx1) <- cbind("asian_UGM" = 
+                               c(1, -1)) # non-asian = -1, some-asian = 1
 contrasts(d$country) <- cbind("india_UGM" = 
                                 c(-1, 1)) # us = -1, india = 1
 contrasts(d$framing) <- cbind("opinion_UGM" = 
@@ -624,28 +630,36 @@ round(summary(r2.orthREintSTD)$coefficients,2)
 
 # NEW 2016-07-27: cultural exposure (white-only vs. some asian)
 # cultural exposure comparison: chi-squared & t-tests tests
+
+# ... for ethnicity
+r2.tableEthn <- with(d %>%
+                       filter(study == "2") %>%
+                       select(subid, cultEx, raceEthn) %>%
+                       distinct(),
+                     table(cultEx, raceEthn)); r2.tableEthn
+
 # ... for age
 d.age <- d %>% 
   filter(study == "2") %>%
-  select(subid, age, cultEx1) %>%
+  select(subid, age, cultEx) %>%
   distinct()
 
-r2.tAge <- t.test(age ~ cultEx1, var.equal = T, d.age); r2.tAge
+r2.tAge <- t.test(age ~ cultEx, var.equal = T, d.age); r2.tAge
 
 # ... for gender
 r2.tableGender <- with(d %>% 
-                         filter(phase == "test" & study == "2") %>% 
-                         select(subid, gender, cultEx1) %>% 
+                         filter(study == "2") %>%
+                         select(subid, gender, cultEx) %>% 
                          distinct(subid, .keep_all = T), 
-                       table(gender, cultEx1)); r2.tableGender
+                       table(gender, cultEx)); r2.tableGender
 r2.chisqGender <- summary(r2.tableGender); r2.chisqGender
 
 # ... for sequence assignment
 r2.tableSequence <- with(d %>% 
                            filter(phase == "test" & study == "2") %>% 
-                           select(subid, sequence, cultEx1) %>% 
+                           select(subid, sequence, cultEx) %>% 
                            distinct(subid, .keep_all = T), 
-                         table(sequence, cultEx1)); r2.tableSequence
+                         table(sequence, cultEx)); r2.tableSequence
 r2.chisqSequence <- summary(r2.tableSequence); r2.chisqSequence
 
 # cultural exposure comparison: comparison to neutral
@@ -653,15 +667,15 @@ contrasts(d$pair) <- contrastNeutral
 r2.neutREsimp <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                       data = subset(d, phase == "test" & 
                                       study == "2" & 
-                                      cultEx1 != "NA"))
-r2.neutREadd <- lmer(response ~ pair + cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                                      is.na(cultEx) == F))
+r2.neutREadd <- lmer(response ~ pair + cultEx + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
-                                     cultEx1 != "NA"))
-r2.neutREint <- lmer(response ~ pair * cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                                     is.na(cultEx) == F))
+r2.neutREint <- lmer(response ~ pair * cultEx + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
-                                     cultEx1 != "NA"))
+                                     is.na(cultEx) == F))
 anova(r2.neutREsimp, r2.neutREadd, r2.neutREint)
 anova(r2.neutREsimp, r2.neutREint)
 summary(r2.neutREint)
@@ -671,15 +685,15 @@ contrasts(d$pair, how.many = 11) <- contrastOrthogonal
 r2.orthREsimp <- lmer(response ~ pair + gender + scale(age, scale = F) + (1 | subid), 
                       data = subset(d, phase == "test" & 
                                       study == "2" & 
-                                      cultEx1 != "NA"))
-r2.orthREadd <- lmer(response ~ pair + cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                                      is.na(cultEx) == F))
+r2.orthREadd <- lmer(response ~ pair + cultEx + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
-                                     cultEx1 != "NA"))
-r2.orthREint <- lmer(response ~ pair * cultEx1 + gender + scale(age, scale = F) + (1 | subid), 
+                                     is.na(cultEx) == F))
+r2.orthREint <- lmer(response ~ pair * cultEx + gender + scale(age, scale = F) + (1 | subid), 
                      data = subset(d, phase == "test" & 
                                      study == "2" & 
-                                     cultEx1 != "NA"))
+                                     is.na(cultEx) == F))
 anova(r2.orthREsimp, r2.orthREadd, r2.orthREint)
 anova(r2.orthREsimp, r2.orthREint)
 summary(r2.orthREint)
